@@ -1,6 +1,6 @@
 ﻿using ApplicationLayer.Features.Authorize.Commands.Register;
 using AutoMapper;
-using DomainLayer.Models;
+using DomainLayer.Users;
 using System;
 using System.Collections.Generic;
 using System.Linq;

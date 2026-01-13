@@ -1,7 +1,7 @@
 ﻿using ApplicationLayer.Interfaces;
 using DomainLayer.Common;
-using DomainLayer.Models;
-using InfrastructureLayer.Data;
+using DomainLayer.Users;
+using InfrastructureLayer.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -33,11 +33,15 @@ namespace InfrastructureLayer.Repositories
         }
 
         // Get user by username (used in login)
-        public async Task<User?> GetUserByUsernameAsync(string username)
-        {
-            return await _context.Users.FirstOrDefaultAsync(user => user.UserName!.ToLower() == username.ToLower());
-        }
+      
 
+        public async Task<User?> GetUserByEmailAsync(string email)
+        {
+            var normalizedEmail = email.Trim().ToLower();
+
+            return await _context.Users
+                .FirstOrDefaultAsync(user => user.UserEmail.ToLower() == normalizedEmail);
+        }
         // Save changes to database
         public async Task<OperationResult<bool>> SaveChangesAsync()
         {

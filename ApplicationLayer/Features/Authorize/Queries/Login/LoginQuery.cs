@@ -10,12 +10,12 @@ namespace ApplicationLayer.Features.Authorize.Queries.Login
 {
     public class LoginQuery : IRequest<OperationResult<string>>
     {
-        public string UserName { get; set; }
+        public string UserEmail { get; set; }   
         public string Password { get; set; }
 
-        public LoginQuery(string username, string password)
+        public LoginQuery(string userEmail, string password)
         {
-            UserName = username;
+            UserEmail = userEmail;
             Password = password;
         }
     }
