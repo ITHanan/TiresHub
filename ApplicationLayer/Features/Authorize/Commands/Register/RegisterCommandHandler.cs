@@ -1,7 +1,7 @@
 ﻿using ApplicationLayer.Interfaces;
 using AutoMapper;
 using DomainLayer.Common;
-using DomainLayer.Models;
+using DomainLayer.Users;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -24,42 +24,46 @@ namespace ApplicationLayer.Features.Authorize.Commands.Register
             _mapper = mapper;
         }
 
-        public async Task<OperationResult<string>> Handle(RegisterCommand request, CancellationToken cancellationToken)
+        public async Task<OperationResult<string>> Handle(
+     RegisterCommand request,
+     CancellationToken cancellationToken)
         {
             try
             {
-                // Normalize the email to lowercase once
-                var normalizedEmail = request.UserEmail.ToLower();
+                // 1️⃣ Normalize email ONCE
+                var normalizedEmail = request.UserEmail.Trim().ToLower();
 
-                // Check if the email is already registered
-                var emailExists = await _authRepository.EmailExistsAsync(normalizedEmail);
-                if (emailExists)
-                    return OperationResult<string>.Failure("Email is already registered.");
+                // 2️⃣ Check for existing email
+                if (await _authRepository.EmailExistsAsync(normalizedEmail))
+                {
+                    return OperationResult<string>.Failure(
+                        "Email is already registered.");
+                }
 
-                // Map the DTO to a User entity
+                // 3️⃣ Map request → User
                 var user = _mapper.Map<User>(request);
 
-                // Hash the password manually
+                // 4️⃣ Apply normalized email explicitly
+                user.UserEmail = normalizedEmail;
+
+                // 5️⃣ Hash password
                 user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-                user.UserEmail = user.UserEmail!.ToLower();
 
-                // Add the user to the context (not saved yet)
+                // 6️⃣ Persist user
                 await _authRepository.CreateUserAsync(user);
-
-                // Save the user only if everything succeeded
                 await _authRepository.SaveChangesAsync();
 
-                // Try to generate the token (if this fails, no DB changes happen)
+                // 7️⃣ Generate JWT
                 var token = _jwtGenerator.GenerateToken(user);
 
-                // Return token
                 return OperationResult<string>.Success(token);
             }
             catch (Exception ex)
             {
-                // Handle unexpected errors
-                return OperationResult<string>.Failure($"Error during registration: {ex.Message}");
+                return OperationResult<string>.Failure(
+                    $"Error during registration: {ex.Message}");
             }
         }
+
     }
 }

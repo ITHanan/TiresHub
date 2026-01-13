@@ -1,6 +1,6 @@
 ﻿using ApplicationLayer.Features.Authorize.Commands.Register;
 using AutoMapper;
-using DomainLayer.Models;
+using DomainLayer.Users;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,8 +14,15 @@ namespace ApplicationLayer.Common.Mappings
         public UserProfile()
         {
             CreateMap<RegisterCommand, User>()
-            .ForMember(dest => dest.PasswordHash, opt => opt.Ignore()) // we hash it manually
-            .ForMember(dest => dest.UserEmail, opt => opt.MapFrom(src => src.UserEmail.ToLower())); // normalize email
+                .ConstructUsing(src =>
+                    new User(
+                        src.Name,
+                        
+                        src.UserEmail,
+                        src.Phone,
+                        src.Role
+                    ))
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore());// normalize email
         }   
     }
 }

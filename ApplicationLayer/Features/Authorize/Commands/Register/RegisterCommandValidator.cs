@@ -12,10 +12,7 @@ namespace ApplicationLayer.Features.Authorize.Commands.Register
         public RegisterCommandValidator()
         {
             // Username must be provided and withing valid length
-            RuleFor(user => user.UserName)
-                .NotEmpty().WithMessage("Username is required.")
-                .Must(userName => !string.IsNullOrWhiteSpace(userName)).WithMessage("Username cannot be blank.")
-                .Length(3, 50).WithMessage("Username must be between 3 and 50 characters.");
+         
 
             // Email must be valid and not empty
             RuleFor(user => user.UserEmail)

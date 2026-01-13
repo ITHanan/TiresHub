@@ -11,7 +11,7 @@ namespace ApplicationLayer.Features.Authorize.Queries.Login
     {
         public LoginQueryValidator()
         {
-            RuleFor(user => user.UserName).NotEmpty().WithMessage("Username is required.");
+            RuleFor(user => user.UserEmail).NotEmpty().WithMessage("UserEmail is required.");
             RuleFor(user => user.Password).NotEmpty().WithMessage("Password is required.");
         }
     }

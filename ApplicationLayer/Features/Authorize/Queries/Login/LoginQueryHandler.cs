@@ -25,7 +25,7 @@ namespace ApplicationLayer.Features.Authorize.Queries.Login
             try
             {
                 // Look up the user by username
-                var user = await _authRepository.GetUserByUsernameAsync(request.UserName);
+                var user = await _authRepository.GetUserByEmailAsync(request.UserEmail);
 
                 // Validate password
                 if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))

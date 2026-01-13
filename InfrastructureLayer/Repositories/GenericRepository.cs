@@ -1,6 +1,6 @@
 ﻿using ApplicationLayer.Interfaces;
 using DomainLayer.Common;
-using InfrastructureLayer.Data;
+using InfrastructureLayer.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace InfrastructureLayer.Repositories

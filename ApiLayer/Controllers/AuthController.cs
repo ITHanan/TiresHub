@@ -22,7 +22,13 @@ namespace ApiLayer.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] UserRegisterDto userRegisterDto)
         {
-            var command = new RegisterCommand(userRegisterDto.UserName, userRegisterDto.UserEmail, userRegisterDto.Password);
+            var command = new RegisterCommand(
+                userRegisterDto.Name,
+                userRegisterDto.UserEmail,
+                userRegisterDto.Password,
+                userRegisterDto.phone,
+                userRegisterDto.Role 
+            );
             var result = await _mediator.Send(command);
 
             if (!result.IsSuccess)
@@ -35,7 +41,7 @@ namespace ApiLayer.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLoginDto userLoginDto)
         {
-            var query = new LoginQuery(userLoginDto.UserName, userLoginDto.Password);
+            var query = new LoginQuery(userLoginDto.UserEmail, userLoginDto.Password);
             var result = await _mediator.Send(query);
 
             if (!result.IsSuccess)
