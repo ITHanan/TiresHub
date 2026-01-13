@@ -1,7 +1,9 @@
 
 using ApplicationLayer;
+using ApplicationLayer.Interfaces;
 using InfrastructureLayer;
 using InfrastructureLayer.Extensions;
+using InfrastructureLayer.Helpers;
 
 namespace ApiLayer
 {
@@ -22,6 +24,7 @@ namespace ApiLayer
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerWithJwt();
+
 
             var app = builder.Build();
 

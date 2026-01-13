@@ -21,10 +21,15 @@ namespace InfrastructureLayer.Helpers
         {
             var jwtSettings = _configuration.GetSection("JwtSettings");
 
+            var keyString = jwtSettings["Key"];
+            if (string.IsNullOrWhiteSpace(keyString))
+            {
+                throw new InvalidOperationException(
+                    "JWT Key is missing. Check JwtSettings:Key in appsettings.json");
+            }
+
             var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(
-                    jwtSettings["Key"]
-                    ?? throw new InvalidOperationException("JWT Key missing")));
+                Encoding.UTF8.GetBytes(keyString));
 
             var credentials = new SigningCredentials(
                 key,
@@ -38,12 +43,16 @@ namespace InfrastructureLayer.Helpers
                 new Claim(ClaimTypes.Role, user.Role.ToString())
             };
 
+            var expiresMinutes = double.TryParse(
+                jwtSettings["ExpireMinutes"], out var minutes)
+                ? minutes
+                : 60;
+
             var token = new JwtSecurityToken(
                 issuer: jwtSettings["Issuer"],
                 audience: jwtSettings["Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(
-                    double.Parse(jwtSettings["ExpireMinutes"] ?? "60")),
+                expires: DateTime.UtcNow.AddMinutes(expiresMinutes),
                 signingCredentials: credentials
             );
 

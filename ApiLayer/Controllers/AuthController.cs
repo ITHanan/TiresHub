@@ -22,7 +22,13 @@ namespace ApiLayer.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] UserRegisterDto userRegisterDto)
         {
-            var command = new RegisterCommand(userRegisterDto.UserEmail, userRegisterDto.Password);
+            var command = new RegisterCommand(
+                userRegisterDto.Name,
+                userRegisterDto.UserEmail,
+                userRegisterDto.Password,
+                userRegisterDto.phone,
+                userRegisterDto.Role 
+            );
             var result = await _mediator.Send(command);
 
             if (!result.IsSuccess)
