@@ -1,5 +1,5 @@
 ﻿using DomainLayer.Common;
-
+//this class is used to store user credentials such as password hash separately from user profile information for security reasons 
 namespace DomainLayer.Users
 {
     public class UserCredential : BaseEntity
