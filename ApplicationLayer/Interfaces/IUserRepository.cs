@@ -1,0 +1,20 @@
+﻿using DomainLayer.Users;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ApplicationLayer.Interfaces
+{
+    public interface IUserRepository
+    {
+        Task AddAsync(User user);
+        Task<User?> GetByEmailAsync(string email);
+        Task<User?> GetByIdentifierAsync(string identifier);
+
+        Task<bool> EmailExistsAsync(string email);
+        Task SaveChangesAsync();
+        Task<User?> GetByIdAsync(Guid userId);
+    }
+}

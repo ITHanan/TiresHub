@@ -21,6 +21,8 @@ namespace InfrastructureLayer
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
             services.AddScoped<IAuthRepository, AuthRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IVerificationCodeRepository, VerificationCodeRepository>();
             services.AddScoped<IJwtGenerator, JWTGenerator>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 

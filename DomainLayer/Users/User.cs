@@ -8,8 +8,9 @@ namespace DomainLayer.Users
         public  string  Name { get; private set; }= default!;
         public string UserEmail { get; set; } = default!;
         public string PasswordHash { get; set; } = default!;
-        public string Phone { get; private set; }
+        public string? Phone { get; private set; }
         public UserRole Role { get; private set; }
+        public bool OnboardingCompleted { get; private set; } 
         public bool IsActive { get; private set; }
 
         protected User() { }
@@ -21,6 +22,15 @@ namespace DomainLayer.Users
             Phone = phone;
             Role = role;
             IsActive = true;
+        }
+
+
+        public void CompleteOnboarding()
+        {
+            if (OnboardingCompleted)
+                return;
+
+            OnboardingCompleted = true;
         }
         public void SetName(string name)
         {
@@ -42,6 +52,9 @@ namespace DomainLayer.Users
         {
             PasswordHash = hash;
         }
+
+
+       
 
         public void Deactivate() => IsActive = false;
         public void Activate() => IsActive = true;
