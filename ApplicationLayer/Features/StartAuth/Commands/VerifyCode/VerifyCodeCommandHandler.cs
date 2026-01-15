@@ -41,7 +41,7 @@ namespace ApplicationLayer.Features.StartAuth.Commands.VerifyCode
 
 
             // 3. Load or create user
-            var user = await _users.GetByEmailAsync(request.Identifier);
+            var user = await _users.GetByIdentifierAsync(request.Identifier);
             var isFirstLogin = false;
 
             if (user == null)
@@ -49,7 +49,7 @@ namespace ApplicationLayer.Features.StartAuth.Commands.VerifyCode
                 user = new User(
                     name: "New User",
                     email: request.Identifier,
-                    phone: null,
+                    phone: "",
                     role: UserRole.VehicleOwner // role already validated in StartAuth
                 );
 

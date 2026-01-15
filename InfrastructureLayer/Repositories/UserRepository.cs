@@ -37,6 +37,23 @@ namespace InfrastructureLayer.Repositories
                 .FirstOrDefaultAsync(u => u.UserEmail == normalizedEmail);
         }
 
+        public async Task<User?> GetByIdentifierAsync(string identifier)
+        {
+            var normalized = identifier.Trim().ToLower();
+
+            return await _context.Users.FirstOrDefaultAsync(u =>
+                u.UserEmail.ToLower() == normalized ||
+                (u.Phone != null && u.Phone == normalized)
+            );
+        }
+
+
+        public async Task<User?> GetByIdAsync(Guid userId)
+        {
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.Id == userId);
+        }
+
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();

@@ -11,7 +11,10 @@ namespace ApplicationLayer.Interfaces
     {
         Task AddAsync(User user);
         Task<User?> GetByEmailAsync(string email);
+        Task<User?> GetByIdentifierAsync(string identifier);
+
         Task<bool> EmailExistsAsync(string email);
         Task SaveChangesAsync();
+        Task<User?> GetByIdAsync(Guid userId);
     }
 }

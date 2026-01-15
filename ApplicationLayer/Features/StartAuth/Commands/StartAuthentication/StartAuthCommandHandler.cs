@@ -44,7 +44,7 @@ namespace ApplicationLayer.Features.StartAuth.Commands
             await _codes.SaveChangesAsync();
 
             // Mock send (log only)
-            Console.WriteLine($"Verification code for {request.Identifier}: {code}");
+          //  Console.WriteLine($"Verification code for {request.Identifier}: {code}");// ta bort sen 
 
             return OperationResult<Unit>.Success(Unit.Value);
 

@@ -23,6 +23,15 @@ namespace DomainLayer.Users
             Role = role;
             IsActive = true;
         }
+
+
+        public void CompleteOnboarding()
+        {
+            if (OnboardingCompleted)
+                return;
+
+            OnboardingCompleted = true;
+        }
         public void SetName(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -45,10 +54,7 @@ namespace DomainLayer.Users
         }
 
 
-        public void CompleteOnboarding()
-        {
-            OnboardingCompleted = true;
-        }
+       
 
         public void Deactivate() => IsActive = false;
         public void Activate() => IsActive = true;
