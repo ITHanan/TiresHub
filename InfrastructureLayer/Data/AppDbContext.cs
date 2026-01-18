@@ -80,6 +80,9 @@ namespace InfrastructureLayer.Persistence
                       .HasDefaultValue(false)
                       .IsRequired();
 
+                entity.Property(u => u.BranchId)
+                      .IsRequired(false);
+
                 entity.Property(u => u.IsActive)
                     .HasDefaultValue(true);
 

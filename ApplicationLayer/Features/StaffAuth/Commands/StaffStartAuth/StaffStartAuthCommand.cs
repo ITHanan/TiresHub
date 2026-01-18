@@ -6,8 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ApplicationLayer.Features.Onboarding.Commands
+namespace ApplicationLayer.Features.StaffAuth.Commands.StaffStartAuth
 {
-    public record CompleteOnboardingCommand(Guid UserId) : IRequest<OperationResult<Unit>>;
+    public record StaffStartAuthCommand(string Identifier):IRequest<OperationResult<Unit>>;
    
 }

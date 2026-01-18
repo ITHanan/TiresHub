@@ -2,6 +2,10 @@
 using ApplicationLayer.Features.Authorize.DTOs;
 using ApplicationLayer.Features.Authorize.Queries.Login;
 using ApplicationLayer.Features.Onboarding.Commands;
+using ApplicationLayer.Features.StaffAuth.Commands;
+using ApplicationLayer.Features.StaffAuth.Commands.StaffStartAuth;
+using ApplicationLayer.Features.StaffAuth.Commands.StaffVerifyCode;
+using ApplicationLayer.Features.StaffAuth.Dtos;
 using ApplicationLayer.Features.StartAuth.Commands;
 using ApplicationLayer.Features.StartAuth.Commands.VerifyCode;
 using ApplicationLayer.Features.StartAuth.Dtos;
@@ -102,6 +106,34 @@ namespace ApiLayer.Controllers
                 return BadRequest(result);
 
             return Ok();
+        }
+
+        [AllowAnonymous]
+        [HttpPost("staff/start")]
+        public async Task<IActionResult> StaffStart([FromBody] StaffStartAuthDto dto)
+        {
+            var command = new StaffStartAuthCommand(dto.Identifier);
+            var result = await _mediator.Send(command);
+
+            if (!result.IsSuccess)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
+
+
+        [AllowAnonymous]
+        [HttpPost("staff/verify")]
+        public async Task<IActionResult> StaffVerify([FromBody] StaffVerifyCodeDto dto)
+        {
+            var command = new StaffVerifyCodeCommand(dto.Identifier, dto.Code);
+            var result = await _mediator.Send(command);
+
+            if (!result.IsSuccess)
+                return BadRequest(result);
+
+            return Ok(result);
         }
 
         /// <summary>
