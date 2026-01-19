@@ -46,6 +46,8 @@ namespace InfrastructureLayer.Persistence
         // ===================== AUDIT =====================
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
+        public DbSet<LoginAuditLog> LoginAuditLogs => Set<LoginAuditLog>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -87,6 +89,27 @@ namespace InfrastructureLayer.Persistence
                     .HasDefaultValue(true);
 
 
+            });
+
+            // ===================== Login Audit Log =====================
+
+            modelBuilder.Entity<LoginAuditLog>(entity =>
+            {
+                entity.HasKey(x => x.Id);
+
+                entity.Property(x => x.Identifier)
+                      .IsRequired()
+                      .HasMaxLength(256);
+
+                entity.Property(x => x.Role)
+                      .IsRequired()
+                      .HasMaxLength(50);
+
+                entity.Property(x => x.Success)
+                      .IsRequired();
+
+                entity.Property(x => x.Timestamp)
+                      .IsRequired();
             });
 
             // ===================== VERIFICATION CODE CONFIG =====================
