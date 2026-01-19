@@ -1,6 +1,7 @@
 ﻿using ApplicationLayer.Features.Authorize.Commands.Register;
 using ApplicationLayer.Features.Authorize.DTOs;
 using ApplicationLayer.Features.Authorize.Queries.Login;
+using ApplicationLayer.Features.LoginAuditLogs.Queries;
 using ApplicationLayer.Features.Onboarding.Commands;
 using ApplicationLayer.Features.StaffAuth.Commands;
 using ApplicationLayer.Features.StaffAuth.Commands.StaffStartAuth;
@@ -135,6 +136,20 @@ namespace ApiLayer.Controllers
 
             return Ok(result);
         }
+
+
+        [Authorize(Roles = "ShopOwner")]
+        [HttpGet("audit/logins")]
+        public async Task<IActionResult> GetLoginAudits()
+        {
+            var result = await _mediator.Send(new GetLoginAuditLogsQuery());
+
+            if (!result.IsSuccess)
+                return BadRequest(result);
+
+            return Ok(result.Data);
+        }
+
 
         /// <summary>
         /// Logs out the currently authenticated user.

@@ -18,6 +18,7 @@ namespace ApplicationLayer.Interfaces
            bool success,
            string? reason = null);
 
+        Task<List<LoginAuditLog>> GetRecentAsync(int take = 100);
         Task SaveChangesAsync();
     }
 }

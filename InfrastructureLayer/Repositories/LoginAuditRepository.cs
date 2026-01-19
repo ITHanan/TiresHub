@@ -1,6 +1,7 @@
 ﻿using ApplicationLayer.Interfaces;
 using DomainLayer.Auditing;
 using InfrastructureLayer.Persistence;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,7 +41,14 @@ namespace InfrastructureLayer.Repositories
             await _context.LoginAuditLogs.AddAsync(log);
             await _context.SaveChangesAsync();
         }
-    
+
+        public async Task<List<LoginAuditLog>> GetRecentAsync(int take = 100)
+        {
+            return await _context.LoginAuditLogs
+                .OrderByDescending(x => x.CreatedAt)
+                .Take(take)
+                .ToListAsync();
+        }
 
         public async Task SaveChangesAsync()
         {
