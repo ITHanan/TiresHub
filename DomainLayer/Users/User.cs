@@ -8,48 +8,19 @@ namespace DomainLayer.Users
         public  string  Name { get; private set; }= default!;
         public string UserEmail { get; set; } = default!;
         public string PasswordHash { get; set; } = default!;
-        public string? Phone { get; private set; }
+        public string Phone { get; private set; }
         public UserRole Role { get; private set; }
-        public bool OnboardingCompleted { get; private set; }
         public bool IsActive { get; private set; }
-        public Guid? BranchId { get; private set; }
 
-       
+        protected User() { }
 
-
-        protected User() { } 
-
-
-        public User(string name, string email, string? phone, UserRole role)
+        public User(string name, string email, string phone, UserRole role)
         {
             SetName(name);
             SetEmail(email);
             Phone = phone;
             Role = role;
-            BranchId = null;
             IsActive = true;
-            OnboardingCompleted = false;
-        }
-
-        public void AssignBranch(Guid branchId)
-        {
-         BranchId = branchId;
-
-        }
-        public void CompleteOnboarding()
-        {
-            if (OnboardingCompleted)
-                return;
-
-            OnboardingCompleted = true;
-        }
-
-        public void SetPasswordHash(string hash)
-        {
-            if (string.IsNullOrWhiteSpace(hash))
-                throw new ArgumentException("Password hash is required");
-
-            PasswordHash = hash;
         }
         public void SetName(string name)
         {
@@ -67,7 +38,10 @@ namespace DomainLayer.Users
             UserEmail = email.ToLower();
         }
 
-       
+        public void SetPasswordHash(string hash)
+        {
+            PasswordHash = hash;
+        }
 
         public void Deactivate() => IsActive = false;
         public void Activate() => IsActive = true;

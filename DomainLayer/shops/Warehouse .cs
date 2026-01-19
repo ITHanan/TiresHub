@@ -26,5 +26,28 @@ namespace DomainLayer.shops
 
         public void IncreaseUsage() => CurrentUsage++;
         public void DecreaseUsage() => CurrentUsage--;
+
+        public void Rename(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Warehouse name is required.");
+            Name = name.Trim();
+        }
+
+        public void Activate() => IsActive = true;
+        public void Deactivate() => IsActive = false;
+
+        public void SetCapacity(int newCapacity, bool forceIfBelowUsage = false)
+        {
+            if (newCapacity < 0)
+                throw new ArgumentException("Storage capacity must be a positive number.");
+
+            if (newCapacity < CurrentUsage && !forceIfBelowUsage)
+                throw new InvalidOperationException("Current storage exceeds the new capacity.");
+
+            Capacity = newCapacity;
+        }
+
     }
+
 }

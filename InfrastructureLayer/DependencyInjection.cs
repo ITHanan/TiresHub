@@ -1,4 +1,6 @@
-﻿using ApplicationLayer.Interfaces;
+﻿using ApplicationLayer.Audit;
+using ApplicationLayer.Interfaces;
+using InfrastructureLayer.Audit;
 using InfrastructureLayer.Helpers;
 using InfrastructureLayer.Persistence;
 using InfrastructureLayer.Repositories;
@@ -21,11 +23,10 @@ namespace InfrastructureLayer
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
             services.AddScoped<IAuthRepository, AuthRepository>();
-            services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IVerificationCodeRepository, VerificationCodeRepository>();
             services.AddScoped<IJwtGenerator, JWTGenerator>();
-            services.AddScoped<ILoginAuditRepository, LoginAuditRepository>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            services.AddScoped<IAuditLogger, AuditLogger>();
+
 
             return services;
         }

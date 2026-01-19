@@ -1,5 +1,6 @@
-﻿using DomainLayer.Users;
-using DomainLayer.Common;
+﻿using DomainLayer.Common;
+using DomainLayer.Shops;
+using DomainLayer.Users;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,7 @@ namespace DomainLayer.shops
 
         public ICollection<Warehouse> Warehouses { get; private set; } = new List<Warehouse>();
         public ICollection<User> Employees { get; private set; } = new List<User>();
+        public ICollection<BranchManager> BranchManagers { get; private set; } = new List<BranchManager>();
 
         protected Branch() { }
 

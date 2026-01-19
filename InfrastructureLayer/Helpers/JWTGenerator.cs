@@ -40,18 +40,8 @@ namespace InfrastructureLayer.Helpers
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Name),
                 new Claim(ClaimTypes.Email, user.UserEmail),
-                new Claim(ClaimTypes.Role, user.Role.ToString()),
-
-                //onboarding flag
-                new Claim("OnboardingCompleted", user.OnboardingCompleted.ToString())
+                new Claim(ClaimTypes.Role, user.Role.ToString())
             };
-
-
-            if (user.BranchId.HasValue)
-            {
-              claims.Add(new Claim("BranchId", user.BranchId.Value.ToString()));    
-
-            }
 
             var expiresMinutes = double.TryParse(
                 jwtSettings["ExpireMinutes"], out var minutes)

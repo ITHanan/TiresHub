@@ -17,6 +17,7 @@ namespace ApplicationLayer.Common.Mappings
                 .ConstructUsing(src =>
                     new User(
                         src.Name,
+                        
                         src.UserEmail,
                         src.Phone,
                         src.Role

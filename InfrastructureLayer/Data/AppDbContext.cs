@@ -2,6 +2,7 @@
 using DomainLayer.Bookings;
 using DomainLayer.Communication;
 using DomainLayer.shops;
+using DomainLayer.Shops;
 using DomainLayer.Users;
 using DomainLayer.Vehicles;
 using Microsoft.EntityFrameworkCore;
@@ -18,13 +19,14 @@ namespace InfrastructureLayer.Persistence
         // ===================== USERS =====================
         public DbSet<User> Users => Set<User>();
 
-        //===================== VERIFICATION CODES =====================
-        public DbSet<VerificationCode> VerificationCodes => Set<VerificationCode>();
-
         // ===================== SHOPS =====================
         public DbSet<ShopCompany> ShopCompanies => Set<ShopCompany>();
         public DbSet<Branch> Branches => Set<Branch>();
         public DbSet<Warehouse> Warehouses => Set<Warehouse>();
+
+        // NEW (UC-07)
+        public DbSet<ShopManager> ShopManagers => Set<ShopManager>();
+        public DbSet<BranchManager> BranchManagers => Set<BranchManager>();
 
         // ===================== VEHICLES =====================
         public DbSet<Vehicle> Vehicles => Set<Vehicle>();
@@ -41,12 +43,8 @@ namespace InfrastructureLayer.Persistence
         public DbSet<OwnerDecision> OwnerDecisions => Set<OwnerDecision>();
         public DbSet<CommunicationLog> CommunicationLogs => Set<CommunicationLog>();
 
-
-
         // ===================== AUDIT =====================
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
-
-        public DbSet<LoginAuditLog> LoginAuditLogs => Set<LoginAuditLog>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -59,7 +57,7 @@ namespace InfrastructureLayer.Persistence
 
                 entity.Property(u => u.Name)
                       .IsRequired()
-                      .HasMaxLength(100);
+                      .HasMaxLength(200);
 
                 entity.Property(u => u.UserEmail)
                       .IsRequired()
@@ -69,76 +67,10 @@ namespace InfrastructureLayer.Persistence
                       .IsUnique();
 
                 entity.Property(u => u.PasswordHash)
-                      .IsRequired(false);
-
-                entity.Property(u => u.Phone)
-                     .HasMaxLength(20)
-                     .IsRequired(false);
+                      .IsRequired();
 
                 entity.Property(u => u.Role)
                       .IsRequired();
-
-                entity.Property(u => u.OnboardingCompleted)
-                      .HasDefaultValue(false)
-                      .IsRequired();
-
-                entity.Property(u => u.BranchId)
-                      .IsRequired(false);
-
-                entity.Property(u => u.IsActive)
-                    .HasDefaultValue(true);
-
-
-            });
-
-            // ===================== Login Audit Log =====================
-
-            modelBuilder.Entity<LoginAuditLog>(entity =>
-            {
-                entity.HasKey(x => x.Id);
-
-                entity.Property(x => x.Identifier)
-                      .IsRequired()
-                      .HasMaxLength(256);
-
-                entity.Property(x => x.Role)
-                      .IsRequired()
-                      .HasMaxLength(50);
-
-                entity.Property(x => x.Success)
-                      .IsRequired();
-
-                entity.Property(x => x.Timestamp)
-                      .IsRequired();
-            });
-
-            // ===================== VERIFICATION CODE CONFIG =====================
-            modelBuilder.Entity<VerificationCode>(entity =>
-            {
-                entity.HasKey(vc => vc.Id);
-
-                entity.Property(vc => vc.Identifier)
-                      .IsRequired()
-                      .HasMaxLength(256);
-
-                entity.Property(vc => vc.Code)
-                      .IsRequired()
-                      .HasMaxLength(10);
-
-                entity.Property(vc => vc.CreatedAt)
-                      .IsRequired();
-
-                entity.Property(vc => vc.ExpiresAt)
-                      .IsRequired();
-
-                entity.Property(vc => vc.Used)
-                      .IsRequired();
-
-                entity.HasIndex(vc => new
-                {
-                    vc.Identifier,
-                    vc.Code
-                });
             });
 
             // ===================== SHOP COMPANY =====================
@@ -154,6 +86,12 @@ namespace InfrastructureLayer.Persistence
                       .WithOne(b => b.ShopCompany)
                       .HasForeignKey(b => b.ShopCompanyId)
                       .OnDelete(DeleteBehavior.Cascade);
+
+                // OPTIONAL: om du vill koppla Owner navigation i EF
+                // entity.HasOne(s => s.Owner)
+                //       .WithMany()
+                //       .HasForeignKey(s => s.OwnerId)
+                //       .OnDelete(DeleteBehavior.Restrict);
             });
 
             // ===================== BRANCH =====================
@@ -161,14 +99,19 @@ namespace InfrastructureLayer.Persistence
             {
                 entity.HasKey(b => b.Id);
 
-                entity.Property(b => b.Name)
-                      .IsRequired();
+                entity.Property(b => b.Name).IsRequired();
+                entity.Property(b => b.City).IsRequired();
+                entity.Property(b => b.Address).IsRequired();
 
-                entity.Property(b => b.City)
-                      .IsRequired();
+                // Optional: default value
+                entity.Property(b => b.IsActive)
+                      .HasDefaultValue(true);
 
-                entity.Property(b => b.Address)
-                      .IsRequired();
+                // NEW: Branch -> Warehouses relation is already in Warehouse config,
+                // men du kan ha den här också om du vill:
+                // entity.HasMany(b => b.Warehouses)
+                //       .WithOne(w => w.Branch)
+                //       .HasForeignKey(w => w.BranchId);
             });
 
             // ===================== WAREHOUSE =====================
@@ -176,15 +119,65 @@ namespace InfrastructureLayer.Persistence
             {
                 entity.HasKey(w => w.Id);
 
-                entity.Property(w => w.Name)
-                      .IsRequired();
+                entity.Property(w => w.Name).IsRequired();
 
                 entity.Property(w => w.Capacity)
                       .IsRequired();
 
+                entity.Property(w => w.CurrentUsage)
+                      .IsRequired();
+
+                entity.Property(w => w.IsActive)
+                      .HasDefaultValue(true);
+
                 entity.HasOne(w => w.Branch)
                       .WithMany(b => b.Warehouses)
-                      .HasForeignKey(w => w.BranchId);
+                      .HasForeignKey(w => w.BranchId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // NEW (UC-05): Warehouse name must be unique within a branch
+                entity.HasIndex(w => new { w.BranchId, w.Name })
+                      .IsUnique();
+            });
+
+            // ===================== SHOP MANAGER (NEW UC-07) =====================
+            modelBuilder.Entity<ShopManager>(entity =>
+            {
+                entity.HasKey(m => m.Id);
+
+                entity.Property(m => m.Name)
+                      .IsRequired()
+                      .HasMaxLength(200);
+
+                entity.Property(m => m.Email)
+                      .HasMaxLength(255);
+
+                entity.Property(m => m.Phone)
+                      .HasMaxLength(50);
+
+                entity.Property(m => m.IsActive)
+                      .HasDefaultValue(true);
+
+                // (valfritt) om du vill förhindra dubletter:
+                // entity.HasIndex(m => m.Email).IsUnique();
+                // entity.HasIndex(m => m.Phone).IsUnique();
+            });
+
+            // ===================== BRANCH MANAGER (JOIN TABLE) =====================
+            modelBuilder.Entity<BranchManager>(entity =>
+            {
+                // composite key
+                entity.HasKey(x => new { x.BranchId, x.ShopManagerId });
+
+                entity.HasOne(x => x.Branch)
+                      .WithMany(b => b.BranchManagers) // kräver att du lagt BranchManagers på Branch
+                      .HasForeignKey(x => x.BranchId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(x => x.ShopManager)
+                      .WithMany(m => m.BranchManagers) // kräver att du lagt BranchManagers på ShopManager
+                      .HasForeignKey(x => x.ShopManagerId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
             // ===================== VEHICLE =====================
@@ -270,8 +263,20 @@ namespace InfrastructureLayer.Persistence
             modelBuilder.Entity<AuditLog>(entity =>
             {
                 entity.HasKey(a => a.Id);
-                entity.Property(a => a.Action).IsRequired();
+
+                entity.Property(a => a.Action)
+                      .IsRequired()
+                      .HasMaxLength(200);
+
+                entity.Property(a => a.EntityType)
+                      .IsRequired()
+                      .HasMaxLength(200);
+
+                // NEW: om du lagt Timestamp i AuditLog
+                // entity.Property(a => a.Timestamp)
+                //       .HasDefaultValueSql("SYSUTCDATETIME()");
             });
         }
     }
 }
+
