@@ -4,6 +4,7 @@ using ApplicationLayer.Interfaces;
 using InfrastructureLayer;
 using InfrastructureLayer.Extensions;
 using InfrastructureLayer.Helpers;
+using InfrastructureLayer.Middleware;
 
 namespace ApiLayer
 {
@@ -37,7 +38,7 @@ namespace ApiLayer
 
             app.UseHttpsRedirection();
             app.UseAuthentication(); // must come before UseAuthorization
-
+            app.UseMiddleware<OnboardingCompletionMiddleware>();
             app.UseAuthorization();
             app.MapControllers();
 

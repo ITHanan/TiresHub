@@ -18,6 +18,9 @@ namespace InfrastructureLayer.Persistence
         // ===================== USERS =====================
         public DbSet<User> Users => Set<User>();
 
+        //===================== VERIFICATION CODES =====================
+        public DbSet<VerificationCode> VerificationCodes => Set<VerificationCode>();
+
         // ===================== SHOPS =====================
         public DbSet<ShopCompany> ShopCompanies => Set<ShopCompany>();
         public DbSet<Branch> Branches => Set<Branch>();
@@ -38,8 +41,12 @@ namespace InfrastructureLayer.Persistence
         public DbSet<OwnerDecision> OwnerDecisions => Set<OwnerDecision>();
         public DbSet<CommunicationLog> CommunicationLogs => Set<CommunicationLog>();
 
+
+
         // ===================== AUDIT =====================
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+
+        public DbSet<LoginAuditLog> LoginAuditLogs => Set<LoginAuditLog>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -52,7 +59,7 @@ namespace InfrastructureLayer.Persistence
 
                 entity.Property(u => u.Name)
                       .IsRequired()
-                      .HasMaxLength(200);
+                      .HasMaxLength(100);
 
                 entity.Property(u => u.UserEmail)
                       .IsRequired()
@@ -62,10 +69,76 @@ namespace InfrastructureLayer.Persistence
                       .IsUnique();
 
                 entity.Property(u => u.PasswordHash)
-                      .IsRequired();
+                      .IsRequired(false);
+
+                entity.Property(u => u.Phone)
+                     .HasMaxLength(20)
+                     .IsRequired(false);
 
                 entity.Property(u => u.Role)
                       .IsRequired();
+
+                entity.Property(u => u.OnboardingCompleted)
+                      .HasDefaultValue(false)
+                      .IsRequired();
+
+                entity.Property(u => u.BranchId)
+                      .IsRequired(false);
+
+                entity.Property(u => u.IsActive)
+                    .HasDefaultValue(true);
+
+
+            });
+
+            // ===================== Login Audit Log =====================
+
+            modelBuilder.Entity<LoginAuditLog>(entity =>
+            {
+                entity.HasKey(x => x.Id);
+
+                entity.Property(x => x.Identifier)
+                      .IsRequired()
+                      .HasMaxLength(256);
+
+                entity.Property(x => x.Role)
+                      .IsRequired()
+                      .HasMaxLength(50);
+
+                entity.Property(x => x.Success)
+                      .IsRequired();
+
+                entity.Property(x => x.Timestamp)
+                      .IsRequired();
+            });
+
+            // ===================== VERIFICATION CODE CONFIG =====================
+            modelBuilder.Entity<VerificationCode>(entity =>
+            {
+                entity.HasKey(vc => vc.Id);
+
+                entity.Property(vc => vc.Identifier)
+                      .IsRequired()
+                      .HasMaxLength(256);
+
+                entity.Property(vc => vc.Code)
+                      .IsRequired()
+                      .HasMaxLength(10);
+
+                entity.Property(vc => vc.CreatedAt)
+                      .IsRequired();
+
+                entity.Property(vc => vc.ExpiresAt)
+                      .IsRequired();
+
+                entity.Property(vc => vc.Used)
+                      .IsRequired();
+
+                entity.HasIndex(vc => new
+                {
+                    vc.Identifier,
+                    vc.Code
+                });
             });
 
             // ===================== SHOP COMPANY =====================
