@@ -48,52 +48,54 @@ namespace InfrastructureLayer.Persistence
 
         public DbSet<LoginAuditLog> LoginAuditLogs => Set<LoginAuditLog>();
 
+
+  
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // ===================== USER =====================
+         
+
+            // ===== USER config =====
             modelBuilder.Entity<User>(entity =>
             {
                 entity.HasKey(u => u.Id);
 
                 entity.Property(u => u.Name)
-                      .IsRequired()
-                      .HasMaxLength(100);
+                    .IsRequired()
+                    .HasMaxLength(100);
 
                 entity.Property(u => u.UserEmail)
-                      .IsRequired()
-                      .HasMaxLength(255);
+                    .IsRequired()
+                    .HasMaxLength(255);
 
-                entity.HasIndex(u => u.UserEmail)
-                      .IsUnique();
+                entity.HasIndex(u => u.UserEmail).IsUnique();
 
                 entity.Property(u => u.PasswordHash)
-                      .IsRequired(false);
+                    .IsRequired(false);
 
                 entity.Property(u => u.Phone)
-                     .HasMaxLength(20)
-                     .IsRequired(false);
+                    .HasMaxLength(20)
+                    .IsRequired(false);
 
-                entity.Property(u => u.Role)
-                      .IsRequired();
+                entity.Property(u => u.Role).IsRequired();
 
                 entity.Property(u => u.OnboardingCompleted)
-                      .HasDefaultValue(false)
-                      .IsRequired();
-
-                entity.Property(u => u.BranchId)
-                      .IsRequired(false);
+                    .HasDefaultValue(false)
+                    .IsRequired();
 
                 entity.Property(u => u.IsActive)
-                    .HasDefaultValue(true);
-
-
+                    .HasDefaultValue(true)
+                    .IsRequired();
             });
 
-            // ===================== Login Audit Log =====================
+          
 
-            modelBuilder.Entity<LoginAuditLog>(entity =>
+        // ===================== Login Audit Log =====================
+
+        modelBuilder.Entity<LoginAuditLog>(entity =>
             {
                 entity.HasKey(x => x.Id);
 
@@ -156,6 +158,7 @@ namespace InfrastructureLayer.Persistence
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
+
             // ===================== BRANCH =====================
             modelBuilder.Entity<Branch>(entity =>
             {
@@ -170,6 +173,14 @@ namespace InfrastructureLayer.Persistence
                 entity.Property(b => b.Address)
                       .IsRequired();
             });
+            modelBuilder.Entity<User>()
+                      .HasOne<Branch>()
+                      .WithMany(b => b.Employees)
+                      .HasForeignKey(u => u.BranchId)
+                       .OnDelete(DeleteBehavior.Restrict);
+
+
+
 
             // ===================== WAREHOUSE =====================
             modelBuilder.Entity<Warehouse>(entity =>
@@ -272,6 +283,10 @@ namespace InfrastructureLayer.Persistence
                 entity.HasKey(a => a.Id);
                 entity.Property(a => a.Action).IsRequired();
             });
+
+
+
         }
+
     }
 }

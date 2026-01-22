@@ -1,5 +1,7 @@
 ﻿using ApplicationLayer.Interfaces;
+using ApplicationLayer.Interfaces.Identity;
 using InfrastructureLayer.Helpers;
+using InfrastructureLayer.Identity;
 using InfrastructureLayer.Persistence;
 using InfrastructureLayer.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +28,11 @@ namespace InfrastructureLayer
             services.AddScoped<IJwtGenerator, JWTGenerator>();
             services.AddScoped<ILoginAuditRepository, LoginAuditRepository>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            services.AddScoped<ICompanyRepository, CompanyRepository>();
+            services.AddScoped<ICurrentUser, CurrentUser>();
+            services.AddScoped<IBranchRepository, BranchRepository>();
+            services.AddScoped<IWarehouseRepository, WarehouseRepository>();
+
 
             return services;
         }

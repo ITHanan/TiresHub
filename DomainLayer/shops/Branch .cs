@@ -21,6 +21,9 @@ namespace DomainLayer.shops
         public ICollection<Warehouse> Warehouses { get; private set; } = new List<Warehouse>();
         public ICollection<User> Employees { get; private set; } = new List<User>();
 
+     
+
+
         protected Branch() { }
 
         public Branch(string name, string city, string address, Guid shopCompanyId)

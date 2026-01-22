@@ -1,10 +1,14 @@
 ﻿using DomainLayer.Common;
 using DomainLayer.Enums;
+using DomainLayer.shops;
 
 namespace DomainLayer.Users
 {
     public class User : BaseEntity
     {
+        private string email;
+        private UserRole role;
+
         public  string  Name { get; private set; }= default!;
         public string UserEmail { get; set; } = default!;
         public string PasswordHash { get; set; } = default!;
@@ -14,12 +18,13 @@ namespace DomainLayer.Users
         public bool IsActive { get; private set; }
         public Guid? BranchId { get; private set; }
 
-       
 
 
-        protected User() { } 
 
 
+        protected User() { }
+
+      
         public User(string name, string email, string? phone, UserRole role)
         {
             SetName(name);
@@ -31,11 +36,18 @@ namespace DomainLayer.Users
             OnboardingCompleted = false;
         }
 
-        public void AssignBranch(Guid branchId)
+        public User(string email, UserRole role)
         {
-         BranchId = branchId;
-
+            this.email = email;
+            this.role = role;
         }
+
+
+    public void AssignBranch(Guid branchId)
+        {
+            BranchId = branchId;
+        }
+
         public void CompleteOnboarding()
         {
             if (OnboardingCompleted)
@@ -67,7 +79,7 @@ namespace DomainLayer.Users
             UserEmail = email.ToLower();
         }
 
-       
+
 
         public void Deactivate() => IsActive = false;
         public void Activate() => IsActive = true;

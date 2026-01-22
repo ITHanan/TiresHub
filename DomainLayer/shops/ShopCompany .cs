@@ -25,6 +25,8 @@ namespace DomainLayer.shops
             Name = name;
             OwnerId = ownerId;
         }
+
+    
     }
 }
 
