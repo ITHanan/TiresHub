@@ -100,6 +100,7 @@ namespace ApplicationLayer.Managers.Commands.RegisterShopManager
                 ShopCompanyId = first.ShopCompanyId,
                 BranchId = first.Id,
                 Email = user.UserEmail,
+                  Name = user.Name,
                 Phone = user.Phone,
                 Role = user.Role
             };
