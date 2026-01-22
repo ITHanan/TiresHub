@@ -193,13 +193,24 @@ namespace InfrastructureLayer.Persistence
                 entity.HasKey(v => v.Id);
 
                 entity.Property(v => v.PlateNumber)
+                      .IsRequired()
+                      .HasMaxLength(20);
+                entity.Property(v => v.OwnerId)
                       .IsRequired();
 
-                entity.HasIndex(v => v.PlateNumber);
+                entity.HasIndex(v => new { v.OwnerId, v.PlateNumber })
+                      .IsUnique();
+
+                entity.Property(v => v.Make)
+                      .HasMaxLength(50);
+
+                entity.Property(v => v.Model)
+                      .HasMaxLength(50);
 
                 entity.HasMany(v => v.TireSets)
                       .WithOne()
-                      .HasForeignKey(t => t.VehicleId);
+                      .HasForeignKey(t => t.VehicleId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
             // ===================== TIRE SET =====================
