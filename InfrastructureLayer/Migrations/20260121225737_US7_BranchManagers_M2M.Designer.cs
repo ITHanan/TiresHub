@@ -4,6 +4,7 @@ using InfrastructureLayer.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InfrastructureLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260121225737_US7_BranchManagers_M2M")]
+    partial class US7_BranchManagers_M2M
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,21 @@ namespace InfrastructureLayer.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("BranchManagers", b =>
+                {
+                    b.Property<Guid>("BranchId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ShopManagerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("BranchId", "ShopManagerId");
+
+                    b.HasIndex("ShopManagerId");
+
+                    b.ToTable("BranchManagers");
+                });
 
             modelBuilder.Entity("DomainLayer.Auditing.AuditLog", b =>
                 {
@@ -244,9 +262,6 @@ namespace InfrastructureLayer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("BranchId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -281,8 +296,6 @@ namespace InfrastructureLayer.Migrations
                         .HasColumnType("nvarchar(255)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("BranchId");
 
                     b.HasIndex("UserEmail")
                         .IsUnique();
@@ -515,6 +528,21 @@ namespace InfrastructureLayer.Migrations
                     b.ToTable("Warehouses");
                 });
 
+            modelBuilder.Entity("BranchManagers", b =>
+                {
+                    b.HasOne("DomainLayer.shops.Branch", null)
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DomainLayer.Users.User", null)
+                        .WithMany()
+                        .HasForeignKey("ShopManagerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("DomainLayer.Bookings.Booking", b =>
                 {
                     b.HasOne("DomainLayer.shops.Branch", null)
@@ -546,13 +574,6 @@ namespace InfrastructureLayer.Migrations
                         .HasForeignKey("InspectionReportId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("DomainLayer.Users.User", b =>
-                {
-                    b.HasOne("DomainLayer.shops.Branch", null)
-                        .WithMany("Employees")
-                        .HasForeignKey("BranchId");
                 });
 
             modelBuilder.Entity("DomainLayer.Vehicles.TireSet", b =>
@@ -614,8 +635,6 @@ namespace InfrastructureLayer.Migrations
             modelBuilder.Entity("DomainLayer.shops.Branch", b =>
                 {
                     b.Navigation("Branches");
-
-                    b.Navigation("Employees");
 
                     b.Navigation("Warehouses");
                 });
