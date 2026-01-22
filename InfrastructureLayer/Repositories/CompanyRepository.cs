@@ -36,6 +36,19 @@ namespace InfrastructureLayer.Repositories
                 x => x.Id == companyId && x.OwnerId == ownerId,
                 ct);
         }
+        public async Task<ShopCompany?> GetByIdAsync(Guid id, CancellationToken ct)
+        {
+            return await _db.ShopCompanies
+                .FirstOrDefaultAsync(c => c.Id == id, ct);
+        }
+
+        public async Task<List<ShopCompany>> GetMyCompaniesAsync(Guid ownerId, CancellationToken ct)
+        {
+            return await _db.ShopCompanies
+                .Where(c => c.OwnerId == ownerId)
+                .ToListAsync(ct);
+        }
+
 
     }
 }
