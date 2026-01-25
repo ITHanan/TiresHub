@@ -31,7 +31,12 @@ namespace InfrastructureLayer.Repositories
             await _context.SaveChangesAsync();
         }
 
-        
+        public async Task<Vehicle?> GetByIdAsync(Guid vehicleId)
+        {
+            return await _context.Vehicles
+                .FirstOrDefaultAsync(v => v.Id == vehicleId);
+        }
+
         public async Task<List<Vehicle>> GetByOwnerAsync(Guid ownerId)
         {
             return await _context.Vehicles

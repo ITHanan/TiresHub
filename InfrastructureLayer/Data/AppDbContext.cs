@@ -211,6 +211,10 @@ namespace InfrastructureLayer.Persistence
                       .WithOne()
                       .HasForeignKey(t => t.VehicleId)
                       .OnDelete(DeleteBehavior.Cascade);
+
+                entity.Property(v => v.HasCompletedService)
+                     .HasDefaultValue(false)
+                     .IsRequired();
             });
 
             // ===================== TIRE SET =====================
@@ -218,14 +222,29 @@ namespace InfrastructureLayer.Persistence
             {
                 entity.HasKey(t => t.Id);
 
-                entity.Property(t => t.Brand)
-                      .IsRequired();
-
-                entity.Property(t => t.Size)
-                      .IsRequired();
+                entity.Property(t => t.VehicleId).IsRequired();
 
                 entity.Property(t => t.TireType)
                       .IsRequired();
+
+                entity.Property(t => t.Size)
+                      .IsRequired()
+                      .HasMaxLength(50);
+
+                entity.Property(t => t.Brand)
+                      .IsRequired()
+                      .HasMaxLength(80);
+
+                entity.Property(t => t.Notes)
+                      .HasMaxLength(500)
+                      .IsRequired(false);
+
+                entity.Property(t => t.IsLocked)
+                      .IsRequired()
+                      .HasDefaultValue(false);
+
+                entity.HasIndex(t => new { t.VehicleId, t.TireType })
+                      .IsUnique();
             });
 
             // ===================== VEHICLE STORAGE PREF =====================

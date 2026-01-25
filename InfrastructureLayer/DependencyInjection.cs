@@ -27,6 +27,7 @@ namespace InfrastructureLayer
             services.AddScoped<ILoginAuditRepository, LoginAuditRepository>();
             services.AddScoped<IVehicleRepository, VehicleRepository>();
             services.AddScoped<IAuditRepository, AuditRepository>();
+            services.AddScoped<ITireSetRepository, TireSetRepository>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
             return services;

@@ -12,6 +12,8 @@ namespace ApplicationLayer.Interfaces
         Task<bool> ExistsAsync(Guid ownerId, string plateNumber);
         Task AddAsync(DomainLayer.Vehicles.Vehicle vehicle);
 
+        Task<Vehicle?> GetByIdAsync(Guid vehicleId);
+
         Task<List<Vehicle>> GetByOwnerAsync(Guid ownerId);
         Task SaveChangesAsync();
     }

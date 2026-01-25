@@ -40,7 +40,7 @@ public class CreateVehicleCommandHandlerTests
 
         var handler = CreateHandler();
 
-        
+
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -83,7 +83,7 @@ public class CreateVehicleCommandHandlerTests
         );
         var handler = CreateHandler();
 
-       
+
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
         // Assert
@@ -122,7 +122,7 @@ public class CreateVehicleCommandHandlerTests
         );
         var handler = CreateHandler();
 
-       
+
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -193,7 +193,7 @@ public class CreateVehicleCommandHandlerTests
         );
         var handler = CreateHandler();
 
-      
+
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
         // Assert
@@ -228,7 +228,7 @@ public class CreateVehicleCommandHandlerTests
         );
         var handler = CreateHandler();
 
-      
+
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
         // Assert
@@ -247,5 +247,7 @@ public class CreateVehicleCommandHandlerTests
         _vehicleRepo.Verify(r => r.AddAsync(It.IsAny<Vehicle>()), Times.Never);
         _vehicleRepo.Verify(r => r.SaveChangesAsync(), Times.Never);
     }
+
+    
 
 }

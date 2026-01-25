@@ -16,6 +16,8 @@ namespace DomainLayer.Vehicles
 
         public Guid OwnerId { get; private set; }
 
+        public bool HasCompletedService { get; private set; }
+
         public ICollection<TireSet> TireSets { get; private set; } = new List<TireSet>();
 
         protected Vehicle() { }
@@ -40,6 +42,8 @@ namespace DomainLayer.Vehicles
                 .ToUpperInvariant();
         }
 
+
+
         private void SetYear(int? year)
         {
             if (year is null)
@@ -50,5 +54,13 @@ namespace DomainLayer.Vehicles
 
             Year = year;
         }
+
+
+        public void MarkServiceCompleted()
+        {
+            HasCompletedService = true;
+        }
+
+        
     }
 }
