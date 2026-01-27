@@ -27,6 +27,9 @@ namespace InfrastructureLayer
             services.AddScoped<IVerificationCodeRepository, VerificationCodeRepository>();
             services.AddScoped<IJwtGenerator, JWTGenerator>();
             services.AddScoped<ILoginAuditRepository, LoginAuditRepository>();
+            services.AddScoped<IVehicleRepository, VehicleRepository>();
+            services.AddScoped<IAuditRepository, AuditRepository>();
+            services.AddScoped<ITireSetRepository, TireSetRepository>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<ICompanyRepository, CompanyRepository>();
             services.AddScoped<ICurrentUser, CurrentUser>();

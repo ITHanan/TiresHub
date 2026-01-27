@@ -16,7 +16,7 @@ namespace InfrastructureLayer.Extensions
             {
                 options.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Title = "LoveAtFirstBite API",
+                    Title = "TireHub API",
                     Version = "v1"
                 });
 
