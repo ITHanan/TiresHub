@@ -15,6 +15,8 @@ namespace ApplicationLayer.Interfaces
         Task<Vehicle?> GetByIdAsync(Guid vehicleId);
 
         Task<List<Vehicle>> GetByOwnerAsync(Guid ownerId);
+
+        Task<List<Vehicle>> GetActiveByOwnerAsync(Guid ownerId);
         Task SaveChangesAsync();
     }
 }

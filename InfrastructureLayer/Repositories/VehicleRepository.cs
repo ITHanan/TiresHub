@@ -44,5 +44,14 @@ namespace InfrastructureLayer.Repositories
                 .OrderByDescending(v => v.CreatedAt)
                 .ToListAsync();
         }
+
+        public async Task<List<Vehicle>> GetActiveByOwnerAsync(Guid ownerId)
+        {
+            return await _context.Vehicles
+                .Where(v => v.OwnerId == ownerId && v.IsActive)
+                .OrderByDescending(v => v.CreatedAt)
+                .ToListAsync();
+        }
+
     }
 }

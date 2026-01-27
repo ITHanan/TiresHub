@@ -36,27 +36,34 @@ namespace ApplicationLayer.Features.TireSet.Command.UpdateTireSet
             if (vehicle is null)
                 return OperationResult<bool>.Failure("Vehicle not found.");
 
-            if (vehicle.HasCompletedService)
-            {
-                if (request.ActorRole == UserRole.VehicleOwner)
-                {
-                    await LogFail(request, "Tire data locked after service completion.");
-                    return OperationResult<bool>.Failure(
-                        "Tire data is locked after service completion.");
-                }
 
-                if (request.ActorRole != UserRole.ShopManager)
-                    return OperationResult<bool>.Failure("Unauthorized.");
+            if (!vehicle.HasCompletedService)
+            {
+                // BEFORE SERVICE → OWNER ONLY
+                if (request.ActorRole != UserRole.VehicleOwner)
+                {
+                    await LogFail(request, "Only vehicle owner can update tire data before service.");
+                    return OperationResult<bool>.Failure(
+                        "Only vehicle owner can update tire data before service.");
+                }
             }
             else
             {
-                return OperationResult<bool>.Failure(
-                    "Tire data can only be updated after service completion.");
+                // AFTER SERVICE → MANAGER ONLY
+                if (request.ActorRole != UserRole.ShopManager)
+                {
+                    await LogFail(request, "Tire data is locked after service completion.");
+                    return OperationResult<bool>.Failure(
+                        "Tire data is locked after service completion.");
+                }
             }
 
             try
             {
-                tireSet.Update(request.Size, request.Brand, request.Notes);
+                if (request.ActorRole == UserRole.ShopManager)
+                    tireSet.UpdateByManager(request.Size, request.Brand, request.Notes);
+                else
+                    tireSet.Update(request.Size, request.Brand, request.Notes);
             }
             catch (ArgumentException ex)
             {

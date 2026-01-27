@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ApplicationLayer.Features.Vehicle.Command
+namespace ApplicationLayer.Features.Vehicles.Command.CreateVehicle
 {
     public record CreateVehicleCommand(
         Guid OwnerId,

@@ -1,10 +1,9 @@
-﻿using ApplicationLayer.Features.Vehicle.Command;
-using ApplicationLayer.Interfaces;
+﻿using ApplicationLayer.Interfaces;
 using DomainLayer.Auditing;
 using DomainLayer.Common;
 using MediatR;
 
-namespace ApplicationLayer.Features.Vehicles.Command
+namespace ApplicationLayer.Features.Vehicles.Command.CreateVehicle
 {
     public class CreateVehicleCommandHandler
      : IRequestHandler<CreateVehicleCommand, OperationResult<Guid>>
@@ -24,7 +23,6 @@ namespace ApplicationLayer.Features.Vehicles.Command
             CreateVehicleCommand request,
             CancellationToken cancellationToken)
         {
-            // 1️⃣ Manual validation (بدل FluentValidation)
             if (string.IsNullOrWhiteSpace(request.PlateNumber))
             {
                 await _audit.LogAsync(

@@ -1,7 +1,9 @@
 ﻿using ApplicationLayer.Features.TireSet.Command;
 using ApplicationLayer.Features.TireSet.Command.CeateTire;
+using ApplicationLayer.Features.TireSet.Command.UpdateTireSet;
 using ApplicationLayer.Features.TireSet.Dtos;
 using ApplicationLayer.Features.TireSet.Queries;
+using DomainLayer.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -64,6 +66,35 @@ namespace ApiLayer.Controllers
                 return BadRequest(result);
 
             return Ok(result.Data);
+        }
+
+        [HttpPut("{tireSetId:guid}")]
+        public async Task<IActionResult> Update(
+               Guid tireSetId,
+               [FromBody] UpdateTireSetRequest request,
+               CancellationToken ct)
+        {
+            var userId = Guid.Parse(
+                User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+            var role = Enum.Parse<UserRole>(
+                User.FindFirstValue(ClaimTypes.Role)!);
+
+            var command = new UpdateTireSetCommand(
+                ActorUserId: userId,
+                ActorRole: role,
+                TireSetId: tireSetId,
+                Size: request.Size,
+                Brand: request.Brand,
+                Notes: request.Notes
+            );
+
+            var result = await _mediator.Send(command, ct);
+
+            if (!result.IsSuccess)
+                return BadRequest(new { error = result.ErrorMessage });
+
+            return NoContent();
         }
     }
 }

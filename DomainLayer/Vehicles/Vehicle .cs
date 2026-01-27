@@ -14,8 +14,11 @@ namespace DomainLayer.Vehicles
         public string? Model { get; private set; }
         public int? Year { get; private set; }
 
+
         public Guid OwnerId { get; private set; }
 
+        public bool IsActive { get; private set; } 
+        public DateTime? DearchivedAt { get; private set; }
         public bool HasCompletedService { get; private set; }
 
         public ICollection<TireSet> TireSets { get; private set; } = new List<TireSet>();
@@ -30,6 +33,23 @@ namespace DomainLayer.Vehicles
             OwnerId = ownerId;
             Model = model;
             Year = year;
+            IsActive = true;
+            CreatedAt = DateTime.UtcNow;    
+        }
+
+
+        public void Deactivate()
+        {
+            if (!IsActive) return;
+            IsActive = false;
+            DearchivedAt = DateTime.UtcNow;
+        }
+
+        public void Activate()
+        {
+            if (IsActive) return;
+            IsActive = true;
+            DearchivedAt = null;
         }
 
         private void SetPlateNumber(string plateNumber)
@@ -55,7 +75,7 @@ namespace DomainLayer.Vehicles
             Year = year;
         }
 
-
+       
         public void MarkServiceCompleted()
         {
             HasCompletedService = true;

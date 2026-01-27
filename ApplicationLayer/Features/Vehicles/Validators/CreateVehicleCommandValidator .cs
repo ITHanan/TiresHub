@@ -1,4 +1,4 @@
-﻿using ApplicationLayer.Features.Vehicle.Command;
+﻿using ApplicationLayer.Features.Vehicles.Command.CreateVehicle;
 using FluentValidation;
 using System;
 using System.Collections.Generic;

@@ -1,5 +1,4 @@
-﻿using ApplicationLayer.Features.Vehicle.Command;
-using ApplicationLayer.Features.Vehicles.Command;
+﻿using ApplicationLayer.Features.Vehicles.Command.CreateVehicle;
 using ApplicationLayer.Interfaces;
 using DomainLayer.Auditing;
 using DomainLayer.Vehicles;

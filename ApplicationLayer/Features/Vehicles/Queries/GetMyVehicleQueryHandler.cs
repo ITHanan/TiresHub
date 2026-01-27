@@ -24,9 +24,11 @@ namespace ApplicationLayer.Features.Vehicles.Queries
             GetMyVehiclesQuery request,
             CancellationToken cancellationToken)
         {
-            var vehicles = await _vehicles.GetByOwnerAsync(request.OwnerId);
+            var vehicles = await _vehicles.GetActiveByOwnerAsync(request.OwnerId);
 
-            var result = vehicles.Select(v => new VehicleDto(
+
+           // Find only active vehicles
+            var activeVehicle = vehicles.Where(v => v.IsActive).Select(v => new VehicleDto(
                 v.Id,
                 v.PlateNumber,
                 v.Make,
@@ -35,7 +37,7 @@ namespace ApplicationLayer.Features.Vehicles.Queries
                 v.CreatedAt
             )).ToList();
 
-            return OperationResult<List<VehicleDto>>.Success(result);
+            return OperationResult<List<VehicleDto>>.Success(activeVehicle);
         }
     }
 }

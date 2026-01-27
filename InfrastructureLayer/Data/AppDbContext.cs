@@ -195,8 +195,17 @@ namespace InfrastructureLayer.Persistence
                 entity.Property(v => v.PlateNumber)
                       .IsRequired()
                       .HasMaxLength(20);
+
                 entity.Property(v => v.OwnerId)
                       .IsRequired();
+
+
+                entity.Property(v => v.IsActive)
+                      .HasDefaultValue(true)
+                      .IsRequired();
+
+                entity.Property(v => v.DearchivedAt)
+                      .IsRequired(false);
 
                 entity.HasIndex(v => new { v.OwnerId, v.PlateNumber })
                       .IsUnique();
