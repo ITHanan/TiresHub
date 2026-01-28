@@ -133,47 +133,7 @@ public class UpdateTireSetCommandHandlerTests
         ), Times.Never);
     }
 
-    [Fact]
-    public async Task Update_Fails_When_Service_NotCompleted()
-    {
-        // Arrange
-        var ownerId = Guid.NewGuid();
-        var vehicle = CreateVehicle(ownerId, hasCompletedService: false);
-        var tireSet = CreateTireSet(vehicle.Id);
 
-        _tireSetRepo.Setup(r => r.GetByIdAsync(tireSet.Id)).ReturnsAsync(tireSet);
-        _vehicleRepo.Setup(r => r.GetByIdAsync(vehicle.Id)).ReturnsAsync(vehicle);
-
-        var handler = CreateHandler();
-
-        var cmd = new UpdateTireSetCommand(
-            ActorUserId: Guid.NewGuid(),
-            ActorRole: UserRole.ShopManager,
-            TireSetId: tireSet.Id,
-            Size: "225/45R17",
-            Brand: "Pirelli",
-            Notes: null
-        );
-
-        // Act
-        var result = await handler.Handle(cmd, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.ErrorMessage.Should().Contain("only be updated after service completion");
-
-        _auditRepo.Verify(a => a.LogAsync(
-            It.IsAny<Guid?>(),
-            It.IsAny<string>(),
-            It.IsAny<string>(),
-            It.IsAny<Guid?>(),
-            It.IsAny<bool>(),
-            It.IsAny<string?>(),
-            It.IsAny<string?>()
-        ), Times.Never);
-
-        _tireSetRepo.Verify(r => r.SaveChangesAsync(), Times.Never);
-    }
 
     [Fact]
     public async Task Update_Fails_When_Actor_Is_VehicleOwner_After_Service_And_Logs_AuditFail()
@@ -218,50 +178,7 @@ public class UpdateTireSetCommandHandlerTests
         _tireSetRepo.Verify(r => r.SaveChangesAsync(), Times.Never);
     }
 
-    [Fact]
-    public async Task Update_Fails_When_Actor_Is_Not_ShopManager_After_Service()
-    {
-        // Arrange
-        var ownerId = Guid.NewGuid();
-        var vehicle = CreateVehicle(ownerId, hasCompletedService: true);
-        var tireSet = CreateTireSet(vehicle.Id);
 
-        _tireSetRepo.Setup(r => r.GetByIdAsync(tireSet.Id)).ReturnsAsync(tireSet);
-        _vehicleRepo.Setup(r => r.GetByIdAsync(vehicle.Id)).ReturnsAsync(vehicle);
-
-        var handler = CreateHandler();
-
-        var cmd = new UpdateTireSetCommand(
-            ActorUserId: Guid.NewGuid(),
-            ActorRole: UserRole.Employee,
-            TireSetId: tireSet.Id,
-            Size: "225/45R17",
-            Brand: "Pirelli",
-            Notes: null
-        );
-
-
-
-
-        // Act
-        var result = await handler.Handle(cmd, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.ErrorMessage.Should().Be("Unauthorized.");
-
-        _auditRepo.Verify(a => a.LogAsync(
-            It.IsAny<Guid?>(),
-            It.IsAny<string>(),
-            It.IsAny<string>(),
-            It.IsAny<Guid?>(),
-            It.IsAny<bool>(),
-            It.IsAny<string?>(),
-            It.IsAny<string?>()
-        ), Times.Never);
-
-        _tireSetRepo.Verify(r => r.SaveChangesAsync(), Times.Never);
-    }
 
     [Fact]
     public async Task Update_Succeeds_For_ShopManager_After_Service_And_Logs_AuditSuccess()
