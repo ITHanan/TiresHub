@@ -31,7 +31,7 @@ public class StaffStartAuthTests
             .Setup(r => r.GetByIdentifierAsync("ghost@test.com"))
             .ReturnsAsync((User?)null);
 
-        var command = new StaffStartAuthCommand("ghost@test.com");
+        var command = new StaffStartAuthCommand("ghost@test.com", UserRole.ShopManager);
 
         // Act
         var result = await _startHandler.Handle(
@@ -62,7 +62,7 @@ public class StaffStartAuthTests
             .Setup(r => r.GetByIdentifierAsync("manager@test.com"))
             .ReturnsAsync(user);
 
-        var command = new StaffStartAuthCommand("manager@test.com");
+        var command = new StaffStartAuthCommand("manager@test.com", UserRole.ShopManager);
 
         // Act
         var result = await _startHandler.Handle(

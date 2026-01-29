@@ -25,10 +25,10 @@ public class VerifyCodeCommandHandlerTests
         var handler = CreateHandler();
 
         _codes.Setup(c =>
-            c.GetValidCodeAsync("test@email.com", "123456"))
+            c.GetValidCodeAsync("test@email.com", "123456", UserRole.VehicleOwner))
             .ReturnsAsync((VerificationCode?)null);
 
-        var command = new VerifyCodeCommand("test@email.com", "123456");
+        var command = new VerifyCodeCommand("test@email.com", "123456", UserRole.VehicleOwner);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -43,21 +43,21 @@ public class VerifyCodeCommandHandlerTests
     public async Task VerifyCode_Fails_When_Code_Is_Expired()
     {
         // Arrange
-        var expiredCode = new VerificationCode("test@email.com", "123456");
+        var expiredCode = new VerificationCode("test@email.com", "123456", UserRole.VehicleOwner);
         expiredCode.MarkAsUsed(); // simulate invalid/expired
 
         var handler = CreateHandler();
 
         _codes.Setup(c =>
-            c.GetValidCodeAsync("test@email.com", "123456"))
+            c.GetValidCodeAsync("test@email.com", "123456", UserRole.VehicleOwner))
             .ReturnsAsync((VerificationCode?)null);
 
-        var command = new VerifyCodeCommand("test@email.com", "123456");
+        var command = new VerifyCodeCommand("test@email.com", "123456", UserRole.VehicleOwner);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
-        // Assert
+        // Assert   
         result.IsSuccess.Should().BeFalse();
     }
 
@@ -65,10 +65,10 @@ public class VerifyCodeCommandHandlerTests
     public async Task VerifyCode_Creates_New_User_On_First_Login()
     {
         // Arrange
-        var verification = new VerificationCode("new@email.com", "123456");
+        var verification = new VerificationCode("new@email.com", "123456",UserRole.VehicleOwner);
 
         _codes.Setup(c =>
-            c.GetValidCodeAsync("new@email.com", "123456"))
+            c.GetValidCodeAsync("new@email.com", "123456", UserRole.VehicleOwner))
             .ReturnsAsync(verification);
 
         _users.Setup(u =>
@@ -79,7 +79,7 @@ public class VerifyCodeCommandHandlerTests
             .Returns("jwt-token");
 
         var handler = CreateHandler();
-        var command = new VerifyCodeCommand("new@email.com", "123456");
+        var command = new VerifyCodeCommand("new@email.com", "123456", UserRole.VehicleOwner);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -103,10 +103,10 @@ public class VerifyCodeCommandHandlerTests
             role: UserRole.VehicleOwner
         );
 
-        var verification = new VerificationCode("sara@email.com", "123456");
+        var verification = new VerificationCode("sara@email.com", "123456", UserRole.VehicleOwner);
 
         _codes.Setup(c =>
-            c.GetValidCodeAsync("sara@email.com", "123456"))
+            c.GetValidCodeAsync("sara@email.com", "123456", UserRole.VehicleOwner))
             .ReturnsAsync(verification);
 
         _users.Setup(u =>
@@ -117,7 +117,7 @@ public class VerifyCodeCommandHandlerTests
             .Returns("jwt-token");
 
         var handler = CreateHandler();
-        var command = new VerifyCodeCommand("sara@email.com", "123456");
+        var command = new VerifyCodeCommand("sara@email.com", "123456", UserRole.VehicleOwner);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -133,10 +133,10 @@ public class VerifyCodeCommandHandlerTests
     public async Task VerifyCode_Marks_Code_As_Used()
     {
         // Arrange
-        var verification = new VerificationCode("test@email.com", "123456");
+        var verification = new VerificationCode("test@email.com", "123456", UserRole.VehicleOwner);
 
         _codes.Setup(c =>
-            c.GetValidCodeAsync("test@email.com", "123456"))
+            c.GetValidCodeAsync("test@email.com", "123456", UserRole.VehicleOwner))
             .ReturnsAsync(verification);
 
         _users.Setup(u =>
@@ -147,7 +147,7 @@ public class VerifyCodeCommandHandlerTests
             .Returns("jwt-token");
 
         var handler = CreateHandler();
-        var command = new VerifyCodeCommand("test@email.com", "123456");
+        var command = new VerifyCodeCommand("test@email.com", "123456", UserRole.VehicleOwner);
 
         // Act
         await handler.Handle(command, CancellationToken.None);

@@ -1,4 +1,5 @@
-﻿using DomainLayer.Users;
+﻿using DomainLayer.Enums;
+using DomainLayer.Users;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,8 @@ namespace ApplicationLayer.Interfaces
 
         Task<VerificationCode?> GetValidCodeAsync(
             string identifier,
-            string code);
+            string code,
+            UserRole role);
 
         Task InvalidateAsync(VerificationCode code);
 

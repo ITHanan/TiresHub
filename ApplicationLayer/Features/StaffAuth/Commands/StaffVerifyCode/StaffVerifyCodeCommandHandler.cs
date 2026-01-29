@@ -32,7 +32,8 @@ public class StaffVerifyCodeCommandHandler
         // 1️⃣ Validate verification code
         var verification = await _codes.GetValidCodeAsync(
             request.Identifier,
-            request.Code);
+            request.Code,
+            request.Role);
 
         if (verification == null)
         {

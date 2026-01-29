@@ -2,9 +2,9 @@
 {
     public enum UserRole
     {
-        VehicleOwner,
-        ShopOwner,
-        ShopManager,
-        Employee
+        VehicleOwner = 0 ,
+        ShopOwner = 1,
+        ShopManager = 2 ,
+        Employee =3 
     }
 }
