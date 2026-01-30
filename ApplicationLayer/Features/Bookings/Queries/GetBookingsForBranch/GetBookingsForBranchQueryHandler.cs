@@ -43,7 +43,7 @@ namespace ApplicationLayer.Features.Bookings.Queries.GetBookingsForBranch
             var branchId = user.BranchId.Value;
 
             // Query bookings for the assigned branch
-            return await _bookingRepository.GetBookingSummariesByBranchIdAsync(branchId);
+            return await _bookingRepository.GetBookingSummariesByBranchIdAsync(branchId, cancellationToken);
         }
     }
 }

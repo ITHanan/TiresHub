@@ -6,10 +6,7 @@ namespace ApplicationLayer.Interfaces
 {
     public interface IBookingRepository
     {
-        Task<List<Booking>> GetBookingsByBranchIdAsync(Guid branchId);
-        Task<Booking?> GetBookingByIdAsync(Guid bookingId);
-        Task<List<BookingSummaryDto>> GetBookingSummariesByBranchIdAsync(Guid branchId);
-        Task<BookingDetailsDto?> GetBookingDetailsAsync(Guid bookingId);
-        Task SaveChangesAsync();
+        Task<List<BookingSummaryDto>> GetBookingSummariesByBranchIdAsync(Guid branchId, CancellationToken cancellationToken = default);
+        Task<BookingDetailsDto?> GetBookingDetailsAsync(Guid bookingId, CancellationToken cancellationToken = default);
     }
 }

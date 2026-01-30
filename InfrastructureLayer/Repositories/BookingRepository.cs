@@ -1,7 +1,6 @@
 using ApplicationLayer.Interfaces;
 using ApplicationLayer.Features.Bookings.Queries.GetBookingsForBranch.DTOs;
 using ApplicationLayer.Features.Bookings.Queries.GetBookingDetails.DTOs;
-using DomainLayer.Bookings;
 using InfrastructureLayer.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,21 +15,7 @@ namespace InfrastructureLayer.Repositories
             _db = db;
         }
 
-        public async Task<List<Booking>> GetBookingsByBranchIdAsync(Guid branchId)
-        {
-            return await _db.Bookings
-                .Where(b => b.BranchId == branchId)
-                .OrderBy(b => b.AppointmentDate)
-                .ToListAsync();
-        }
-
-        public async Task<Booking?> GetBookingByIdAsync(Guid bookingId)
-        {
-            return await _db.Bookings
-                .FirstOrDefaultAsync(b => b.Id == bookingId);
-        }
-
-        public async Task<List<BookingSummaryDto>> GetBookingSummariesByBranchIdAsync(Guid branchId)
+        public async Task<List<BookingSummaryDto>> GetBookingSummariesByBranchIdAsync(Guid branchId, CancellationToken cancellationToken = default)
         {
             return await _db.Bookings
                 .Where(b => b.BranchId == branchId)
@@ -47,10 +32,10 @@ namespace InfrastructureLayer.Repositories
                         BranchId = booking.BranchId
                     })
                 .OrderBy(b => b.AppointmentDate)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
         }
 
-        public async Task<BookingDetailsDto?> GetBookingDetailsAsync(Guid bookingId)
+        public async Task<BookingDetailsDto?> GetBookingDetailsAsync(Guid bookingId, CancellationToken cancellationToken = default)
         {
             return await _db.Bookings
                 .Where(b => b.Id == bookingId)
@@ -73,12 +58,7 @@ namespace InfrastructureLayer.Repositories
                         WarehouseId = bv.booking.WarehouseId,
                         AssignedEmployeeId = bv.booking.AssignedEmployeeId
                     })
-                .FirstOrDefaultAsync();
-        }
-
-        public async Task SaveChangesAsync()
-        {
-            await _db.SaveChangesAsync();
+                .FirstOrDefaultAsync(cancellationToken);
         }
     }
 }

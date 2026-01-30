@@ -46,7 +46,7 @@ namespace ApplicationLayer.Features.Bookings.Queries.GetBookingDetails
             var branchId = user.BranchId.Value;
 
             // Get the booking details
-            var bookingDetails = await _bookingRepository.GetBookingDetailsAsync(request.BookingId);
+            var bookingDetails = await _bookingRepository.GetBookingDetailsAsync(request.BookingId, cancellationToken);
 
             if (bookingDetails == null)
                 throw new InvalidOperationException("Booking not found.");
