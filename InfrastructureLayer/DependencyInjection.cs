@@ -35,6 +35,7 @@ namespace InfrastructureLayer
             services.AddScoped<ICurrentUser, CurrentUser>();
             services.AddScoped<IBranchRepository, BranchRepository>();
             services.AddScoped<IWarehouseRepository, WarehouseRepository>();
+            services.AddScoped<IBookingRepository, BookingRepository>();
 
 
             return services;

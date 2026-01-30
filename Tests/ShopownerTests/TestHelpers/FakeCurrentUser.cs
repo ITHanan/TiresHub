@@ -6,5 +6,6 @@ public class FakeCurrentUser : ICurrentUser
 {
     public bool IsAuthenticated { get; set; } = true;
     public Guid UserId { get; set; } = Guid.NewGuid();
-    public UserRole Role { get; set; } = UserRole.ShopOwner; // ändra om du har annan enum
+    public UserRole Role { get; set; } = UserRole.ShopOwner;
+    public Guid? BranchId { get; set; } = null;
 }

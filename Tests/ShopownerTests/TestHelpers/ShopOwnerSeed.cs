@@ -1,4 +1,8 @@
-﻿using DomainLayer.shops;
+﻿using DomainLayer.Bookings;
+using DomainLayer.Enums;
+using DomainLayer.shops;
+using DomainLayer.Users;
+using DomainLayer.Vehicles;
 using InfrastructureLayer.Persistence;
 
 namespace Tests.ShopownerTests.TestHelpers;
@@ -7,7 +11,7 @@ public static class ShopOwnerSeed
 {
     public static ShopCompany Company(AppDbContext db, Guid ownerId, string name = "TestCo")
     {
-        var company = new ShopCompany(name, ownerId); // du har nu implementerat Create()
+        var company = new ShopCompany(name, ownerId);
         db.ShopCompanies.Add(company);
         return company;
     }
@@ -24,5 +28,32 @@ public static class ShopOwnerSeed
         var warehouse = new Warehouse(name, capacity, branch.Id);
         db.Warehouses.Add(warehouse);
         return warehouse;
+    }
+
+    public static User ShopManager(AppDbContext db, Branch branch, string name = "Manager1", string email = "manager@test.com")
+    {
+        var user = new User(name, email, null, UserRole.ShopManager);
+        user.AssignBranch(branch.Id);
+        user.SetPasswordHash("hashedpassword");
+        db.Users.Add(user);
+        return user;
+    }
+
+    public static Vehicle Vehicle(AppDbContext db, Guid ownerId, string plateNumber = "ABC123")
+    {
+        var vehicle = new Vehicle(plateNumber, ownerId);
+        db.Vehicles.Add(vehicle);
+        return vehicle;
+    }
+
+    public static Booking Booking(AppDbContext db, Branch branch, Vehicle vehicle, ServiceType serviceType = ServiceType.ChangeTires, DateTime? appointmentDate = null)
+    {
+        var booking = new Booking(
+            serviceType,
+            appointmentDate ?? DateTime.UtcNow.AddDays(1),
+            vehicle.Id,
+            branch.Id);
+        db.Bookings.Add(booking);
+        return booking;
     }
 }
