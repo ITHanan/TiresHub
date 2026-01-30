@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InfrastructureLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260121233943_RestoreUsersBranchId")]
-    partial class RestoreUsersBranchId
+    [Migration("20260130162929_Creatinitial")]
+    partial class Creatinitial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,18 +35,27 @@ namespace InfrastructureLayer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("ActorUserId")
+                    b.Property<Guid?>("ActorUserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("EntityId")
+                    b.Property<Guid?>("EntityId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("EntityType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Metadata")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Success")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
@@ -121,9 +130,9 @@ namespace InfrastructureLayer.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BranchId");
-
                     b.HasIndex("VehicleId");
+
+                    b.HasIndex("BranchId", "AppointmentDate");
 
                     b.ToTable("Bookings");
                 });
@@ -333,24 +342,25 @@ namespace InfrastructureLayer.Migrations
 
                     b.Property<string>("Brand")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Condition")
-                        .HasColumnType("int");
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsLocked")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
-                    b.Property<string>("Model")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Size")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("TireType")
                         .HasColumnType("int");
@@ -360,7 +370,8 @@ namespace InfrastructureLayer.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("VehicleId");
+                    b.HasIndex("VehicleId", "TireType")
+                        .IsUnique();
 
                     b.ToTable("TireSets");
                 });
@@ -374,25 +385,42 @@ namespace InfrastructureLayer.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("DearchivedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("HasCompletedService")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<string>("Make")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Model")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("PlateNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<int?>("Year")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PlateNumber");
+                    b.HasIndex("OwnerId", "PlateNumber")
+                        .IsUnique();
 
                     b.ToTable("Vehicles");
                 });
@@ -433,9 +461,6 @@ namespace InfrastructureLayer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("BranchId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("City")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -454,8 +479,6 @@ namespace InfrastructureLayer.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("BranchId");
 
                     b.HasIndex("ShopCompanyId");
 
@@ -555,7 +578,8 @@ namespace InfrastructureLayer.Migrations
                 {
                     b.HasOne("DomainLayer.shops.Branch", null)
                         .WithMany("Employees")
-                        .HasForeignKey("BranchId");
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("DomainLayer.Vehicles.TireSet", b =>
@@ -569,10 +593,6 @@ namespace InfrastructureLayer.Migrations
 
             modelBuilder.Entity("DomainLayer.shops.Branch", b =>
                 {
-                    b.HasOne("DomainLayer.shops.Branch", null)
-                        .WithMany("Branches")
-                        .HasForeignKey("BranchId");
-
                     b.HasOne("DomainLayer.shops.ShopCompany", "ShopCompany")
                         .WithMany("Branches")
                         .HasForeignKey("ShopCompanyId")
@@ -616,8 +636,6 @@ namespace InfrastructureLayer.Migrations
 
             modelBuilder.Entity("DomainLayer.shops.Branch", b =>
                 {
-                    b.Navigation("Branches");
-
                     b.Navigation("Employees");
 
                     b.Navigation("Warehouses");

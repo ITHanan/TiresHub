@@ -25,6 +25,7 @@ The purpose of this project is to demonstrate the ability to:
 ## 🧩 Core Features
 
 ### 👥 Roles & Permissions
+
 - **Vehicle Owner** – registers vehicles, books services, views tire information
 - **Shop Owner** – registers workshop, manages warehouses and capacity, invites managers
 - **Shop Manager** – handles bookings, assigns employees, communicates with customers, updates tire data
@@ -35,6 +36,7 @@ All staff access (shop managers and employees) is **invitation-based**.
 ---
 
 ### 🛞 Tire & Booking Workflow
+
 - Vehicle owners book tire change or tire purchase services
 - Stored tires are inspected **after booking**
 - Employees upload inspection photos and reports
@@ -44,6 +46,7 @@ All staff access (shop managers and employees) is **invitation-based**.
 ---
 
 ### 📦 Warehouse & Storage Management
+
 - Shops define multiple warehouses (A / B / C, etc.)
 - Each warehouse has a defined capacity
 - Storage availability affects booking decisions
@@ -54,12 +57,14 @@ All staff access (shop managers and employees) is **invitation-based**.
 ## 🏗️ Technical Architecture
 
 ### Backend
+
 - **.NET Web API**
 - Clean Architecture (Controllers, Services, Repositories, DTOs)
 - Validation, logging, and global error handling
 - Azure SQL database with EF Core migrations
 
 ### Frontend
+
 - **React**
 - API-driven UI
 - Role-based dashboards
@@ -67,6 +72,7 @@ All staff access (shop managers and employees) is **invitation-based**.
 - Environment-based configuration
 
 ### Infrastructure
+
 - **Azure App Service** (Backend API)
 - **Azure SQL Database**
 - **Azure Static Web App** (Frontend)
@@ -91,6 +97,7 @@ ER diagrams and architecture diagrams are included in the documentation.
 ## ⚙️ Local Development Setup
 
 ### Prerequisites
+
 - .NET SDK (latest LTS)
 - Node.js (LTS)
 - npm or yarn
@@ -200,3 +207,32 @@ Professional team collaboration
 📄 License
 This project is developed for educational purposes as part of a fullstack course.
 
+### 📋 UC-13: Branch-Scoped Booking Visibility (Shop Manager)
+
+**Description:**
+Shop managers can view and access only bookings assigned to their specific branch. This ensures data isolation and prevents unauthorized access to bookings from other branches.
+
+**Key Features:**
+- **Branch-Scoped Access:** Shop managers see only bookings for their assigned branch
+- **Authorization Enforcement:** Attempts to access bookings from other branches are blocked and logged
+- **Read-Only at Intake Stage:** Booking data cannot be modified at this stage (assignment and inspection happen later)
+- **Ordered by Appointment Date:** Bookings are displayed in chronological order (ascending)
+- **Empty State Handling:** Clean UI when no bookings exist for the branch
+
+**API Endpoints:**
+- `GET /api/bookings` - Retrieve all bookings for the authenticated shop manager's branch
+- `GET /api/bookings/{bookingId}` - View details of a specific booking (with branch authorization check)
+
+**Security:**
+- Single-branch access enforcement for shop managers
+- Audit logging of unauthorized access attempts
+- Branch ownership validation on every request
+
+**Technical Implementation:**
+- Database index on `(BranchId, AppointmentDate)` for efficient queries
+- Clean Architecture with CQRS pattern (MediatR)
+- Repository pattern for data access
+- Comprehensive unit tests covering authorization scenarios
+
+---
+```

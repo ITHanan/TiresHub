@@ -127,9 +127,9 @@ namespace InfrastructureLayer.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BranchId");
-
                     b.HasIndex("VehicleId");
+
+                    b.HasIndex("BranchId", "AppointmentDate");
 
                     b.ToTable("Bookings");
                 });
@@ -458,9 +458,6 @@ namespace InfrastructureLayer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("BranchId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("City")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -479,8 +476,6 @@ namespace InfrastructureLayer.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("BranchId");
 
                     b.HasIndex("ShopCompanyId");
 
@@ -580,7 +575,8 @@ namespace InfrastructureLayer.Migrations
                 {
                     b.HasOne("DomainLayer.shops.Branch", null)
                         .WithMany("Employees")
-                        .HasForeignKey("BranchId");
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("DomainLayer.Vehicles.TireSet", b =>
@@ -594,10 +590,6 @@ namespace InfrastructureLayer.Migrations
 
             modelBuilder.Entity("DomainLayer.shops.Branch", b =>
                 {
-                    b.HasOne("DomainLayer.shops.Branch", null)
-                        .WithMany("Branches")
-                        .HasForeignKey("BranchId");
-
                     b.HasOne("DomainLayer.shops.ShopCompany", "ShopCompany")
                         .WithMany("Branches")
                         .HasForeignKey("ShopCompanyId")
@@ -641,8 +633,6 @@ namespace InfrastructureLayer.Migrations
 
             modelBuilder.Entity("DomainLayer.shops.Branch", b =>
                 {
-                    b.Navigation("Branches");
-
                     b.Navigation("Employees");
 
                     b.Navigation("Warehouses");

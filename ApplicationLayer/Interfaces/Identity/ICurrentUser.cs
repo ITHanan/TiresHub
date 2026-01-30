@@ -13,5 +13,6 @@ namespace ApplicationLayer.Interfaces.Identity
         bool IsAuthenticated { get; }
         Guid UserId { get; }
         UserRole Role { get; }
+        Guid? BranchId { get; }
     }
 }

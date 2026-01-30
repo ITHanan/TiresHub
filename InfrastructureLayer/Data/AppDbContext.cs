@@ -294,6 +294,9 @@ namespace InfrastructureLayer.Persistence
                 entity.HasOne<Branch>()
                       .WithMany()
                       .HasForeignKey(b => b.BranchId);
+
+                // Add index for efficient branch-scoped booking queries
+                entity.HasIndex(b => new { b.BranchId, b.AppointmentDate });
             });
 
             // ===================== INSPECTION =====================

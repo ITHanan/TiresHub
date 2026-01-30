@@ -42,5 +42,16 @@ namespace InfrastructureLayer.Identity
             }
         }
 
+
+        public Guid? BranchId
+        {
+            get
+            {
+                var value = _http.HttpContext?.User?.FindFirstValue("BranchIdd");
+                if (string.IsNullOrWhiteSpace(value))
+                    return null;
+                return Guid.TryParse(value, out var branchId) ? branchId : null;
+            }
+        }
     }
 }
