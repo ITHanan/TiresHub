@@ -15,6 +15,6 @@ namespace ApplicationLayer.Interfaces
 
         Task<bool> EmailExistsAsync(string email);
         Task SaveChangesAsync();
-        Task<User?> GetByIdAsync(Guid userId);
+        Task<User?> GetByIdAsync(Guid userId, CancellationToken ct);
     }
 }

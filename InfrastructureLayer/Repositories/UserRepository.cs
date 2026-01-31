@@ -48,10 +48,10 @@ namespace InfrastructureLayer.Repositories
         }
 
 
-        public async Task<User?> GetByIdAsync(Guid userId)
+        public async Task<User?> GetByIdAsync(Guid userId, CancellationToken ct)
         {
             return await _context.Users
-                .FirstOrDefaultAsync(u => u.Id == userId);
+                .FirstOrDefaultAsync(u => u.Id == userId, ct);
         }
 
         public async Task SaveChangesAsync()

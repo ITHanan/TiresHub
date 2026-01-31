@@ -294,6 +294,11 @@ namespace InfrastructureLayer.Persistence
                 entity.HasOne<Branch>()
                       .WithMany()
                       .HasForeignKey(b => b.BranchId);
+
+                entity.HasOne<Warehouse>()
+                      .WithMany()
+                      .HasForeignKey(b => b.WarehouseId)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             // ===================== INSPECTION =====================

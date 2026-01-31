@@ -19,7 +19,7 @@ namespace ApplicationLayer.Features.Onboarding.Commands
         }
         public async Task<OperationResult<Unit>> Handle(CompleteOnboardingCommand request, CancellationToken cancellationToken)
         {
-            var user = await _usersRepository.GetByIdAsync(request.UserId);
+            var user = await _usersRepository.GetByIdAsync(request.UserId, cancellationToken);
             if (user == null)
             {
                 return OperationResult<Unit>.Failure("User not found.");

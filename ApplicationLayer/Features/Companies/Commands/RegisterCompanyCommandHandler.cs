@@ -25,7 +25,7 @@ public class RegisterCompanyCommandHandler
     {
         var userId = _currentUser.UserId;
 
-        var user = await _userRepo.GetByIdAsync(userId)
+        var user = await _userRepo.GetByIdAsync(userId, ct)
             ?? throw new InvalidOperationException("User not found.");
 
         var company = new ShopCompany(request.Name, user.Id);
