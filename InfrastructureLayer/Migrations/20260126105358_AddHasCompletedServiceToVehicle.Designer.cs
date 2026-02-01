@@ -4,6 +4,7 @@ using InfrastructureLayer.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InfrastructureLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260126105358_AddHasCompletedServiceToVehicle")]
+    partial class AddHasCompletedServiceToVehicle
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -113,16 +116,10 @@ namespace InfrastructureLayer.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("Quantity")
-                        .HasColumnType("int");
-
                     b.Property<int>("ServiceType")
                         .HasColumnType("int");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TireType")
                         .HasColumnType("int");
 
                     b.Property<Guid>("VehicleId")
@@ -388,18 +385,10 @@ namespace InfrastructureLayer.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("DearchivedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<bool>("HasCompletedService")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
 
                     b.Property<string>("Make")
                         .HasMaxLength(50)
@@ -581,8 +570,7 @@ namespace InfrastructureLayer.Migrations
                 {
                     b.HasOne("DomainLayer.shops.Branch", null)
                         .WithMany("Employees")
-                        .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("BranchId");
                 });
 
             modelBuilder.Entity("DomainLayer.Vehicles.TireSet", b =>

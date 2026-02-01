@@ -18,5 +18,8 @@ namespace ApplicationLayer.Interfaces
 
         Task<List<Vehicle>> GetActiveByOwnerAsync(Guid ownerId);
         Task SaveChangesAsync();
+
+        Task<bool> IsOwnedByUserAsync(Guid vehicleId, Guid userId, CancellationToken ct);
+        Task<string?> GetPlateNumberAsync(Guid vehicleId, CancellationToken ct);
     }
 }

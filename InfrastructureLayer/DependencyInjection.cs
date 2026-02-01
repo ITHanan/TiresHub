@@ -1,9 +1,13 @@
-﻿using ApplicationLayer.Interfaces;
+﻿using ApplicationLayer.Features.Bookings.Commands.CreateBooking;
+using ApplicationLayer.Interfaces;
+using ApplicationLayer.Interfaces.Availability;
+using ApplicationLayer.Interfaces.Bookings;
 using ApplicationLayer.Interfaces.Identity;
 using InfrastructureLayer.Helpers;
 using InfrastructureLayer.Identity;
 using InfrastructureLayer.Persistence;
 using InfrastructureLayer.Repositories;
+using InfrastructureLayer.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,7 +40,14 @@ namespace InfrastructureLayer
             services.AddScoped<IBranchRepository, BranchRepository>();
             services.AddScoped<IWarehouseRepository, WarehouseRepository>();
 
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateBookingCommand).Assembly));
 
+            services.AddScoped<IBookingRepository, BookingRepository>();
+            services.AddScoped<IBranchAvailabilityRepository, BranchAvailabilityRepository>();
+
+            // plus dina:
+            services.AddScoped<IVehicleRepository, VehicleRepository>();
+            services.AddScoped<IBranchRepository, BranchRepository>();
             return services;
         }
     }

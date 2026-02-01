@@ -52,6 +52,21 @@ namespace InfrastructureLayer.Repositories
                 .OrderByDescending(v => v.CreatedAt)
                 .ToListAsync();
         }
+        public async Task<bool> IsOwnedByUserAsync(Guid vehicleId, Guid userId, CancellationToken ct)
+        {
+            return await _context.Vehicles
+                .AsNoTracking()
+                .AnyAsync(v => v.Id == vehicleId && v.OwnerId == userId, ct);
+        }
+
+        public async Task<string?> GetPlateNumberAsync(Guid vehicleId, CancellationToken ct)
+        {
+            return await _context.Vehicles
+                .AsNoTracking()
+                .Where(v => v.Id == vehicleId)
+                .Select(v => v.PlateNumber)
+                .FirstOrDefaultAsync(ct);
+        }
 
     }
 }

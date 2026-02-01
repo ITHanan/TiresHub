@@ -23,12 +23,6 @@ namespace InfrastructureLayer.Migrations
                 name: "BranchId",
                 table: "Users");
 
-            migrationBuilder.AddColumn<Guid>(
-                name: "BranchId",
-                table: "Branches",
-                type: "uniqueidentifier",
-                nullable: true);
-
             migrationBuilder.CreateTable(
                 name: "BranchManagers",
                 columns: table => new
@@ -39,55 +33,34 @@ namespace InfrastructureLayer.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_BranchManagers", x => new { x.BranchId, x.ShopManagerId });
+
                     table.ForeignKey(
                         name: "FK_BranchManagers_Branches_BranchId",
                         column: x => x.BranchId,
                         principalTable: "Branches",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+
                     table.ForeignKey(
                         name: "FK_BranchManagers_Users_ShopManagerId",
                         column: x => x.ShopManagerId,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction); // 👈 VIKTIGT
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Branches_BranchId",
-                table: "Branches",
-                column: "BranchId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BranchManagers_ShopManagerId",
                 table: "BranchManagers",
                 column: "ShopManagerId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Branches_Branches_BranchId",
-                table: "Branches",
-                column: "BranchId",
-                principalTable: "Branches",
-                principalColumn: "Id");
         }
+
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Branches_Branches_BranchId",
-                table: "Branches");
-
             migrationBuilder.DropTable(
                 name: "BranchManagers");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Branches_BranchId",
-                table: "Branches");
-
-            migrationBuilder.DropColumn(
-                name: "BranchId",
-                table: "Branches");
 
             migrationBuilder.AddColumn<Guid>(
                 name: "BranchId",
@@ -107,5 +80,6 @@ namespace InfrastructureLayer.Migrations
                 principalTable: "Branches",
                 principalColumn: "Id");
         }
+
     }
 }
