@@ -1,4 +1,5 @@
 ﻿using ApplicationLayer.Interfaces;
+using DomainLayer.Enums;
 using DomainLayer.Users;
 using InfrastructureLayer.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -26,7 +27,8 @@ namespace InfrastructureLayer.Repositories
 
         public async Task<VerificationCode?> GetValidCodeAsync(
             string identifier,
-            string code)
+            string code,
+            UserRole role)
         {
             var now = DateTime.UtcNow;
 
@@ -34,6 +36,7 @@ namespace InfrastructureLayer.Repositories
                 .Where(vc =>
                     vc.Identifier == identifier &&
                     vc.Code == code &&
+                    vc.Role == role &&
                     !vc.Used &&
                     vc.ExpiresAt >= now)
                 .OrderByDescending(vc => vc.CreatedAt)

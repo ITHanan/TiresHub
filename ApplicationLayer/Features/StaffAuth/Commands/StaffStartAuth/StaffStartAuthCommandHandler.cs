@@ -50,7 +50,8 @@ namespace ApplicationLayer.Features.StaffAuth.Commands.StaffStartAuth
 
             var verification = new VerificationCode(
                 identifier: request.Identifier,
-                code: code
+                code: code,
+                role: user.Role
             );
 
             await _codes.AddAsync(verification);

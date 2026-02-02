@@ -83,7 +83,8 @@ namespace ApiLayer.Controllers
         {
             var command = new VerifyCodeCommand(
                 dto.Identifier,
-                dto.Code
+                dto.Code,
+                dto.Role
             );
 
             var result = await _mediator.Send(command);
@@ -113,7 +114,7 @@ namespace ApiLayer.Controllers
         [HttpPost("staff/start")]
         public async Task<IActionResult> StaffStart([FromBody] StaffStartAuthDto dto)
         {
-            var command = new StaffStartAuthCommand(dto.Identifier);
+            var command = new StaffStartAuthCommand(dto.Identifier,dto.Role);
             var result = await _mediator.Send(command);
 
             if (!result.IsSuccess)
@@ -128,7 +129,7 @@ namespace ApiLayer.Controllers
         [HttpPost("staff/verify")]
         public async Task<IActionResult> StaffVerify([FromBody] StaffVerifyCodeDto dto)
         {
-            var command = new StaffVerifyCodeCommand(dto.Identifier, dto.Code);
+            var command = new StaffVerifyCodeCommand(dto.Identifier, dto.Code, dto.Role);
             var result = await _mediator.Send(command);
 
             if (!result.IsSuccess)

@@ -4,6 +4,7 @@ using InfrastructureLayer.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InfrastructureLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260129021926_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -127,9 +130,9 @@ namespace InfrastructureLayer.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("VehicleId");
+                    b.HasIndex("BranchId");
 
-                    b.HasIndex("BranchId", "AppointmentDate");
+                    b.HasIndex("VehicleId");
 
                     b.ToTable("Bookings");
                 });
@@ -690,6 +693,7 @@ namespace InfrastructureLayer.Migrations
 
             modelBuilder.Entity("DomainLayer.shops.Branch", b =>
                 {
+                    b.Navigation("BranchManagers");
 
                     b.Navigation("Employees");
 
