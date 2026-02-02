@@ -1,4 +1,5 @@
 ﻿using DomainLayer.Common;
+using DomainLayer.Enums;
 
 namespace DomainLayer.Users
 {
@@ -6,15 +7,17 @@ namespace DomainLayer.Users
     {
         public string Identifier { get; private set; } // email or phone
         public string Code { get; private set; }
+        public UserRole Role { get; private set; }
         public DateTime ExpiresAt { get; private set; }
         public bool Used { get; private set; }
 
         protected VerificationCode() { }
 
-        public VerificationCode(string identifier, string code)
+        public VerificationCode(string identifier, string code, UserRole role)
         {
             Identifier = identifier;
             Code = code;
+            Role = role;
             CreatedAt = DateTime.UtcNow;
             ExpiresAt = DateTime.UtcNow.AddMinutes(5);
             Used = false;

@@ -113,16 +113,10 @@ namespace InfrastructureLayer.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("Quantity")
-                        .HasColumnType("int");
-
                     b.Property<int>("ServiceType")
                         .HasColumnType("int");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TireType")
                         .HasColumnType("int");
 
                     b.Property<Guid>("VehicleId")
@@ -327,6 +321,9 @@ namespace InfrastructureLayer.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
                     b.Property<bool>("Used")
                         .HasColumnType("bit");
 
@@ -488,6 +485,32 @@ namespace InfrastructureLayer.Migrations
                     b.ToTable("Branches");
                 });
 
+            modelBuilder.Entity("DomainLayer.shops.BranchManager", b =>
+                {
+                    b.Property<Guid>("BranchId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ShopManagerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("BranchId", "ShopManagerId");
+
+                    b.HasIndex("ShopManagerId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("BranchManagers");
+                });
+
             modelBuilder.Entity("DomainLayer.shops.ShopCompany", b =>
                 {
                     b.Property<Guid>("Id")
@@ -605,6 +628,29 @@ namespace InfrastructureLayer.Migrations
                     b.Navigation("ShopCompany");
                 });
 
+            modelBuilder.Entity("DomainLayer.shops.BranchManager", b =>
+                {
+                    b.HasOne("DomainLayer.shops.Branch", "Branch")
+                        .WithMany("BranchManagers")
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DomainLayer.Users.User", "ShopManager")
+                        .WithMany()
+                        .HasForeignKey("ShopManagerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("DomainLayer.Users.User", null)
+                        .WithMany("ManagedBranches")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Branch");
+
+                    b.Navigation("ShopManager");
+                });
+
             modelBuilder.Entity("DomainLayer.shops.ShopCompany", b =>
                 {
                     b.HasOne("DomainLayer.Users.User", "Owner")
@@ -632,6 +678,11 @@ namespace InfrastructureLayer.Migrations
                     b.Navigation("Photos");
                 });
 
+            modelBuilder.Entity("DomainLayer.Users.User", b =>
+                {
+                    b.Navigation("ManagedBranches");
+                });
+
             modelBuilder.Entity("DomainLayer.Vehicles.Vehicle", b =>
                 {
                     b.Navigation("TireSets");
@@ -639,6 +690,8 @@ namespace InfrastructureLayer.Migrations
 
             modelBuilder.Entity("DomainLayer.shops.Branch", b =>
                 {
+                    b.Navigation("BranchManagers");
+
                     b.Navigation("Employees");
 
                     b.Navigation("Warehouses");

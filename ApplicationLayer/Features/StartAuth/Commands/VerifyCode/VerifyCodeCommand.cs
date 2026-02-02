@@ -1,5 +1,6 @@
 ﻿using ApplicationLayer.Features.StartAuth.Dtos;
 using DomainLayer.Common;
+using DomainLayer.Enums;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,6 @@ using System.Threading.Tasks;
 
 namespace ApplicationLayer.Features.StartAuth.Commands.VerifyCode
 {
-    public record VerifyCodeCommand(string Identifier, string Code)
+    public record VerifyCodeCommand(string Identifier, string Code, UserRole Role)
      : IRequest<OperationResult<AuthResponseDto>>;
 }

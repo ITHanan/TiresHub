@@ -16,6 +16,21 @@ namespace ApiLayer
         {
             var builder = WebApplication.CreateBuilder(args);
 
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("DevCors", policy =>
+                {
+                    policy
+                        .WithOrigins("http://localhost:8080")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                });
+            });
+
+
+
             // Add services to the container.
 
             builder.Services.AddControllers();
@@ -42,6 +57,7 @@ namespace ApiLayer
             }
 
             app.UseHttpsRedirection();
+            app.UseCors("DevCors");
             app.UseAuthentication(); // must come before UseAuthorization
             app.UseMiddleware<OnboardingCompletionMiddleware>();
             app.UseAuthorization();

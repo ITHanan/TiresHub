@@ -1,7 +1,6 @@
 ﻿using ApplicationLayer.Features.StartAuth.Dtos;
 using ApplicationLayer.Interfaces;
 using DomainLayer.Common;
-using DomainLayer.Enums;
 using DomainLayer.Users;
 using MediatR;
 
@@ -28,7 +27,9 @@ namespace ApplicationLayer.Features.StartAuth.Commands.VerifyCode
             // 1. Validate verification code
             var verification = await _codes.GetValidCodeAsync(
                 request.Identifier,
-                request.Code);
+                request.Code,
+                request.Role);
+
 
             if (verification == null)
             {
@@ -50,12 +51,20 @@ namespace ApplicationLayer.Features.StartAuth.Commands.VerifyCode
                     name: "New User",
                     email: request.Identifier,
                     phone: "",
-                    role: UserRole.VehicleOwner // role already validated in StartAuth
+                    role: verification.Role
                 );
 
                 await _users.AddAsync(user);
                 isFirstLogin = true;
             }
+
+            if (user != null && user.Role != request.Role)
+            {
+                return OperationResult<AuthResponseDto>.Failure(
+                    "User role mismatch. Role cannot be changed.");
+            }
+
+
             // 4. Persist changes
             await _codes.SaveChangesAsync();
             await _users.SaveChangesAsync();
@@ -65,12 +74,19 @@ namespace ApplicationLayer.Features.StartAuth.Commands.VerifyCode
 
             // 6. Return auth response
             return OperationResult<AuthResponseDto>.Success(
-                   new AuthResponseDto(
-                       token: token,
-                       isFirstLogin: isFirstLogin,
-                       role: user.Role.ToString()
+                 new AuthResponseDto(
+                     Token: token,
+                     User: new UserDto(
+                        Id: user.Id,
+                        Email: user.UserEmail,
+                        Phone: user.Phone,
+                        Role: (int)user.Role,
+                        IsFirstLogin: isFirstLogin,
+                        OnboardingCompleted: user.OnboardingCompleted
+                     )
                    )
             );
+
 
         }
     }

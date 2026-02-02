@@ -1,5 +1,6 @@
 ﻿using ApplicationLayer.Features.StaffAuth.Dtos;
 using DomainLayer.Common;
+using DomainLayer.Enums;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,7 @@ namespace ApplicationLayer.Features.StaffAuth.Commands.StaffVerifyCode
 {
     public record StaffVerifyCodeCommand(
        string Identifier,
-       string Code
+       string Code,
+       UserRole Role
    ) : IRequest<OperationResult<StaffAuthResponseDto>>;
 }
