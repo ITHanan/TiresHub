@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DomainLayer.shops
 {
-    public class Branch:BaseEntity
+    public class Branch : BaseEntity
     {
         public string Name { get; private set; }
         public string City { get; private set; }
@@ -21,10 +21,7 @@ namespace DomainLayer.shops
         public ICollection<Warehouse> Warehouses { get; private set; } = new List<Warehouse>();
         public ICollection<User> Employees { get; private set; } = new List<User>();
         public ICollection<BranchManager> BranchManagers { get; set; }
-        = new List<BranchManager>();
-
-
-
+            = new List<BranchManager>();
 
         protected Branch() { }
 
@@ -38,5 +35,6 @@ namespace DomainLayer.shops
         }
 
         public void Disable() => IsActive = false;
+
     }
 }
