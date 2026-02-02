@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DomainLayer.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ namespace ApplicationLayer.Features.StartAuth.Dtos
 {
     public record VerifyCodeRequestDto(
        string Identifier,
-       string Code
+       string Code,
+       UserRole Role
    );
 }

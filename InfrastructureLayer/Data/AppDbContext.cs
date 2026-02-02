@@ -11,19 +11,16 @@ namespace InfrastructureLayer.Persistence
     public class AppDbContext : DbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options)
-            : base(options)
-        {
-        }
+            : base(options) { }
 
         // ===================== USERS =====================
         public DbSet<User> Users => Set<User>();
-
-        //===================== VERIFICATION CODES =====================
         public DbSet<VerificationCode> VerificationCodes => Set<VerificationCode>();
 
         // ===================== SHOPS =====================
         public DbSet<ShopCompany> ShopCompanies => Set<ShopCompany>();
         public DbSet<Branch> Branches => Set<Branch>();
+        public DbSet<BranchManager> BranchManagers => Set<BranchManager>();
         public DbSet<Warehouse> Warehouses => Set<Warehouse>();
 
         // ===================== VEHICLES =====================
@@ -41,106 +38,66 @@ namespace InfrastructureLayer.Persistence
         public DbSet<OwnerDecision> OwnerDecisions => Set<OwnerDecision>();
         public DbSet<CommunicationLog> CommunicationLogs => Set<CommunicationLog>();
 
-
-
         // ===================== AUDIT =====================
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
-
         public DbSet<LoginAuditLog> LoginAuditLogs => Set<LoginAuditLog>();
-
-
-  
-
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-         
-
-            // ===== USER config =====
+            // ===================== USER =====================
             modelBuilder.Entity<User>(entity =>
             {
                 entity.HasKey(u => u.Id);
 
                 entity.Property(u => u.Name)
-                    .IsRequired()
-                    .HasMaxLength(100);
+                      .IsRequired()
+                      .HasMaxLength(100);
 
                 entity.Property(u => u.UserEmail)
-                    .IsRequired()
-                    .HasMaxLength(255);
+                      .IsRequired()
+                      .HasMaxLength(255);
 
                 entity.HasIndex(u => u.UserEmail).IsUnique();
 
-                entity.Property(u => u.PasswordHash)
-                    .IsRequired(false);
-
-                entity.Property(u => u.Phone)
-                    .HasMaxLength(20)
-                    .IsRequired(false);
+                entity.Property(u => u.PasswordHash).IsRequired(false);
+                entity.Property(u => u.Phone).HasMaxLength(20).IsRequired(false);
 
                 entity.Property(u => u.Role).IsRequired();
-
-                entity.Property(u => u.OnboardingCompleted)
-                    .HasDefaultValue(false)
-                    .IsRequired();
-
-                entity.Property(u => u.IsActive)
-                    .HasDefaultValue(true)
-                    .IsRequired();
+                entity.Property(u => u.OnboardingCompleted).HasDefaultValue(false);
+                entity.Property(u => u.IsActive).HasDefaultValue(true);
             });
 
-          
+            // User -> Branch (Employees)
+            modelBuilder.Entity<User>()
+                .HasOne<Branch>()
+                .WithMany(b => b.Employees)
+                .HasForeignKey(u => u.BranchId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-        // ===================== Login Audit Log =====================
-
-        modelBuilder.Entity<LoginAuditLog>(entity =>
+            // ===================== LOGIN AUDIT =====================
+            modelBuilder.Entity<LoginAuditLog>(entity =>
             {
                 entity.HasKey(x => x.Id);
-
-                entity.Property(x => x.Identifier)
-                      .IsRequired()
-                      .HasMaxLength(256);
-
-                entity.Property(x => x.Role)
-                      .IsRequired()
-                      .HasMaxLength(50);
-
-                entity.Property(x => x.Success)
-                      .IsRequired();
-
-                entity.Property(x => x.Timestamp)
-                      .IsRequired();
+                entity.Property(x => x.Identifier).IsRequired().HasMaxLength(256);
+                entity.Property(x => x.Role).IsRequired().HasMaxLength(50);
+                entity.Property(x => x.Success).IsRequired();
+                entity.Property(x => x.Timestamp).IsRequired();
             });
 
-            // ===================== VERIFICATION CODE CONFIG =====================
+            // ===================== VERIFICATION CODE =====================
             modelBuilder.Entity<VerificationCode>(entity =>
             {
                 entity.HasKey(vc => vc.Id);
 
-                entity.Property(vc => vc.Identifier)
-                      .IsRequired()
-                      .HasMaxLength(256);
+                entity.Property(vc => vc.Identifier).IsRequired().HasMaxLength(256);
+                entity.Property(vc => vc.Code).IsRequired().HasMaxLength(10);
+                entity.Property(vc => vc.CreatedAt).IsRequired();
+                entity.Property(vc => vc.ExpiresAt).IsRequired();
+                entity.Property(vc => vc.Used).IsRequired();
 
-                entity.Property(vc => vc.Code)
-                      .IsRequired()
-                      .HasMaxLength(10);
-
-                entity.Property(vc => vc.CreatedAt)
-                      .IsRequired();
-
-                entity.Property(vc => vc.ExpiresAt)
-                      .IsRequired();
-
-                entity.Property(vc => vc.Used)
-                      .IsRequired();
-
-                entity.HasIndex(vc => new
-                {
-                    vc.Identifier,
-                    vc.Code
-                });
+                entity.HasIndex(vc => new { vc.Identifier, vc.Code });
             });
 
             // ===================== SHOP COMPANY =====================
@@ -158,44 +115,43 @@ namespace InfrastructureLayer.Persistence
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
-
             // ===================== BRANCH =====================
             modelBuilder.Entity<Branch>(entity =>
             {
                 entity.HasKey(b => b.Id);
-
-                entity.Property(b => b.Name)
-                      .IsRequired();
-
-                entity.Property(b => b.City)
-                      .IsRequired();
-
-                entity.Property(b => b.Address)
-                      .IsRequired();
+                entity.Property(b => b.Name).IsRequired();
+                entity.Property(b => b.City).IsRequired();
+                entity.Property(b => b.Address).IsRequired();
             });
-            modelBuilder.Entity<User>()
-                      .HasOne<Branch>()
-                      .WithMany(b => b.Employees)
-                      .HasForeignKey(u => u.BranchId)
-                       .OnDelete(DeleteBehavior.Restrict);
 
+            // ===================== BRANCH MANAGER =====================
+            modelBuilder.Entity<BranchManager>(entity =>
+            {
+                entity.HasKey(x => new { x.BranchId, x.ShopManagerId });
 
+                entity.HasOne(x => x.Branch)
+                      .WithMany(b => b.BranchManagers)
+                      .HasForeignKey(x => x.BranchId)
+                      .OnDelete(DeleteBehavior.Restrict);
 
+                entity.HasOne(x => x.ShopManager)
+                      .WithMany()
+                      .HasForeignKey(x => x.ShopManagerId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
 
             // ===================== WAREHOUSE =====================
             modelBuilder.Entity<Warehouse>(entity =>
             {
                 entity.HasKey(w => w.Id);
 
-                entity.Property(w => w.Name)
-                      .IsRequired();
-
-                entity.Property(w => w.Capacity)
-                      .IsRequired();
+                entity.Property(w => w.Name).IsRequired();
+                entity.Property(w => w.Capacity).IsRequired();
 
                 entity.HasOne(w => w.Branch)
                       .WithMany(b => b.Warehouses)
-                      .HasForeignKey(w => w.BranchId);
+                      .HasForeignKey(w => w.BranchId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
             // ===================== VEHICLE =====================
@@ -207,34 +163,19 @@ namespace InfrastructureLayer.Persistence
                       .IsRequired()
                       .HasMaxLength(20);
 
-                entity.Property(v => v.OwnerId)
-                      .IsRequired();
+                entity.HasIndex(v => new { v.OwnerId, v.PlateNumber }).IsUnique();
 
+                entity.Property(v => v.Make).HasMaxLength(50);
+                entity.Property(v => v.Model).HasMaxLength(50);
 
-                entity.Property(v => v.IsActive)
-                      .HasDefaultValue(true)
-                      .IsRequired();
-
-                entity.Property(v => v.DearchivedAt)
-                      .IsRequired(false);
-
-                entity.HasIndex(v => new { v.OwnerId, v.PlateNumber })
-                      .IsUnique();
-
-                entity.Property(v => v.Make)
-                      .HasMaxLength(50);
-
-                entity.Property(v => v.Model)
-                      .HasMaxLength(50);
+                entity.Property(v => v.IsActive).HasDefaultValue(true);
+                entity.Property(v => v.HasCompletedService).HasDefaultValue(false);
+                entity.Property(v => v.DearchivedAt).IsRequired(false);
 
                 entity.HasMany(v => v.TireSets)
                       .WithOne()
                       .HasForeignKey(t => t.VehicleId)
                       .OnDelete(DeleteBehavior.Cascade);
-
-                entity.Property(v => v.HasCompletedService)
-                     .HasDefaultValue(false)
-                     .IsRequired();
             });
 
             // ===================== TIRE SET =====================
@@ -242,38 +183,19 @@ namespace InfrastructureLayer.Persistence
             {
                 entity.HasKey(t => t.Id);
 
-                entity.Property(t => t.VehicleId).IsRequired();
+                entity.Property(t => t.Size).IsRequired().HasMaxLength(50);
+                entity.Property(t => t.Brand).IsRequired().HasMaxLength(80);
+                entity.Property(t => t.Notes).HasMaxLength(500);
+                entity.Property(t => t.IsLocked).HasDefaultValue(false);
 
-                entity.Property(t => t.TireType)
-                      .IsRequired();
-
-                entity.Property(t => t.Size)
-                      .IsRequired()
-                      .HasMaxLength(50);
-
-                entity.Property(t => t.Brand)
-                      .IsRequired()
-                      .HasMaxLength(80);
-
-                entity.Property(t => t.Notes)
-                      .HasMaxLength(500)
-                      .IsRequired(false);
-
-                entity.Property(t => t.IsLocked)
-                      .IsRequired()
-                      .HasDefaultValue(false);
-
-                entity.HasIndex(t => new { t.VehicleId, t.TireType })
-                      .IsUnique();
+                entity.HasIndex(t => new { t.VehicleId, t.TireType }).IsUnique();
             });
 
             // ===================== VEHICLE STORAGE PREF =====================
             modelBuilder.Entity<VehicleStoragePreference>(entity =>
             {
                 entity.HasKey(vs => vs.Id);
-
-                entity.HasIndex(vs => new { vs.VehicleId, vs.BranchId })
-                      .IsUnique();
+                entity.HasIndex(vs => new { vs.VehicleId, vs.BranchId }).IsUnique();
             });
 
             // ===================== BOOKING =====================
@@ -281,19 +203,18 @@ namespace InfrastructureLayer.Persistence
             {
                 entity.HasKey(b => b.Id);
 
-                entity.Property(b => b.ServiceType)
-                      .IsRequired();
-
-                entity.Property(b => b.Status)
-                      .IsRequired();
+                entity.Property(b => b.ServiceType).IsRequired();
+                entity.Property(b => b.Status).IsRequired();
 
                 entity.HasOne<Vehicle>()
                       .WithMany()
-                      .HasForeignKey(b => b.VehicleId);
+                      .HasForeignKey(b => b.VehicleId)
+                      .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne<Branch>()
                       .WithMany()
-                      .HasForeignKey(b => b.BranchId);
+                      .HasForeignKey(b => b.BranchId)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             // ===================== INSPECTION =====================
@@ -303,7 +224,8 @@ namespace InfrastructureLayer.Persistence
 
                 entity.HasOne<Booking>()
                       .WithOne()
-                      .HasForeignKey<Inspection>(i => i.BookingId);
+                      .HasForeignKey<Inspection>(i => i.BookingId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
             // ===================== INSPECTION REPORT =====================
@@ -313,7 +235,8 @@ namespace InfrastructureLayer.Persistence
 
                 entity.HasMany(r => r.Photos)
                       .WithOne()
-                      .HasForeignKey(p => p.InspectionReportId);
+                      .HasForeignKey(p => p.InspectionReportId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
             // ===================== AUDIT LOG =====================
@@ -322,10 +245,6 @@ namespace InfrastructureLayer.Persistence
                 entity.HasKey(a => a.Id);
                 entity.Property(a => a.Action).IsRequired();
             });
-
-
-
         }
-
     }
 }

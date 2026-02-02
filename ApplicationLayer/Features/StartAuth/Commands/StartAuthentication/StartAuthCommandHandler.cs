@@ -37,7 +37,8 @@ namespace ApplicationLayer.Features.StartAuth.Commands
 
             var verification = new VerificationCode(
                 identifier: request.Identifier,
-                code: code
+                code: code,
+                role: request.Role
             );
 
             await _codes.AddAsync(verification);

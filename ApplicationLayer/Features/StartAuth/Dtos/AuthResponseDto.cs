@@ -6,19 +6,21 @@ using System.Threading.Tasks;
 
 namespace ApplicationLayer.Features.StartAuth.Dtos
 {
-    public class AuthResponseDto
+    public record AuthResponseDto(
+    string Token,
+    UserDto User
+)
     {
-
-        public string Token { get; init; } = default!;
-        public bool IsFirstLogin { get; init; }  
-
-        public string Role { get; init; } = default!;
-
-        public AuthResponseDto(string token, bool isFirstLogin, string role)
-        {
-            Token = token;
-            IsFirstLogin = isFirstLogin;
-            Role = role;
-        }
+        public bool IsFirstLogin { get; set; }
     }
+
+    public record UserDto(
+        Guid Id,
+        string? Email,
+        string? Phone,
+        int Role,
+        bool IsFirstLogin,
+        bool OnboardingCompleted
+    );
+
 }

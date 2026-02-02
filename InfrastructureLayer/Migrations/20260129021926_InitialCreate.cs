@@ -16,10 +16,13 @@ namespace InfrastructureLayer.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ActorUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ActorUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Action = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     EntityType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    EntityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EntityId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Success = table.Column<bool>(type: "bit", nullable: false),
+                    Reason = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Metadata = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -57,6 +60,24 @@ namespace InfrastructureLayer.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "LoginAuditLogs",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Identifier = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Role = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Success = table.Column<bool>(type: "bit", nullable: false),
+                    FailureReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LoginAuditLogs", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "OwnerDecisions",
                 columns: table => new
                 {
@@ -75,11 +96,14 @@ namespace InfrastructureLayer.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PlateNumber = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Make = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Model = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PlateNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    Make = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Model = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     Year = table.Column<int>(type: "int", nullable: true),
                     OwnerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
+                    DearchivedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    HasCompletedService = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -100,6 +124,23 @@ namespace InfrastructureLayer.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_VehicleStoragePreferences", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "VerificationCodes",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Identifier = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    Role = table.Column<int>(type: "int", nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Used = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VerificationCodes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -127,13 +168,12 @@ namespace InfrastructureLayer.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TireType = table.Column<int>(type: "int", nullable: false),
-                    Brand = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Size = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Model = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Condition = table.Column<int>(type: "int", nullable: false),
-                    IsLocked = table.Column<bool>(type: "bit", nullable: false),
                     VehicleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TireType = table.Column<int>(type: "int", nullable: false),
+                    Size = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Brand = table.Column<string>(type: "nvarchar(80)", maxLength: 80, nullable: false),
+                    Notes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    IsLocked = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -215,12 +255,13 @@ namespace InfrastructureLayer.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     UserEmail = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
                     Role = table.Column<int>(type: "int", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    OnboardingCompleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
                     BranchId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -231,7 +272,8 @@ namespace InfrastructureLayer.Migrations
                         name: "FK_Users_Branches_BranchId",
                         column: x => x.BranchId,
                         principalTable: "Branches",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -255,6 +297,38 @@ namespace InfrastructureLayer.Migrations
                         principalTable: "Branches",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BranchManagers",
+                columns: table => new
+                {
+                    BranchId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ShopManagerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BranchManagers", x => new { x.BranchId, x.ShopManagerId });
+                    table.ForeignKey(
+                        name: "FK_BranchManagers_Branches_BranchId",
+                        column: x => x.BranchId,
+                        principalTable: "Branches",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BranchManagers_Users_ShopManagerId",
+                        column: x => x.ShopManagerId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_BranchManagers_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -293,6 +367,16 @@ namespace InfrastructureLayer.Migrations
                 column: "ShopCompanyId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_BranchManagers_ShopManagerId",
+                table: "BranchManagers",
+                column: "ShopManagerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BranchManagers_UserId",
+                table: "BranchManagers",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_InspectionPhotos_InspectionReportId",
                 table: "InspectionPhotos",
                 column: "InspectionReportId");
@@ -309,9 +393,10 @@ namespace InfrastructureLayer.Migrations
                 column: "OwnerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TireSets_VehicleId",
+                name: "IX_TireSets_VehicleId_TireType",
                 table: "TireSets",
-                column: "VehicleId");
+                columns: new[] { "VehicleId", "TireType" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_BranchId",
@@ -325,15 +410,21 @@ namespace InfrastructureLayer.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Vehicles_PlateNumber",
+                name: "IX_Vehicles_OwnerId_PlateNumber",
                 table: "Vehicles",
-                column: "PlateNumber");
+                columns: new[] { "OwnerId", "PlateNumber" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_VehicleStoragePreferences_VehicleId_BranchId",
                 table: "VehicleStoragePreferences",
                 columns: new[] { "VehicleId", "BranchId" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VerificationCodes_Identifier_Code",
+                table: "VerificationCodes",
+                columns: new[] { "Identifier", "Code" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Warehouses_BranchId",
@@ -368,6 +459,9 @@ namespace InfrastructureLayer.Migrations
                 name: "AuditLogs");
 
             migrationBuilder.DropTable(
+                name: "BranchManagers");
+
+            migrationBuilder.DropTable(
                 name: "CommunicationLogs");
 
             migrationBuilder.DropTable(
@@ -377,6 +471,9 @@ namespace InfrastructureLayer.Migrations
                 name: "Inspections");
 
             migrationBuilder.DropTable(
+                name: "LoginAuditLogs");
+
+            migrationBuilder.DropTable(
                 name: "OwnerDecisions");
 
             migrationBuilder.DropTable(
@@ -384,6 +481,9 @@ namespace InfrastructureLayer.Migrations
 
             migrationBuilder.DropTable(
                 name: "VehicleStoragePreferences");
+
+            migrationBuilder.DropTable(
+                name: "VerificationCodes");
 
             migrationBuilder.DropTable(
                 name: "Warehouses");

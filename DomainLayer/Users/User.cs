@@ -18,6 +18,9 @@ namespace DomainLayer.Users
         public bool IsActive { get; private set; }
         public Guid? BranchId { get; private set; }
 
+        public ICollection<BranchManager> ManagedBranches { get; set; }
+       = new List<BranchManager>();
+
 
 
 

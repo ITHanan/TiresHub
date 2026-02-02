@@ -58,15 +58,16 @@ public class StaffLoginTests
             .Setup(r => r.GetByIdentifierAsync("manager@test.com"))
             .ReturnsAsync(user);
 
-        var code = new VerificationCode("manager@test.com", "123456");
+        var code = new VerificationCode("manager@test.com", "123456", UserRole.ShopManager);
 
         _codeRepo
-            .Setup(r => r.GetValidCodeAsync("manager@test.com", "123456"))
+            .Setup(r => r.GetValidCodeAsync("manager@test.com", "123456", UserRole.ShopManager))
             .ReturnsAsync(code);
 
         var command = new StaffVerifyCodeCommand(
             "manager@test.com",
-            "123456"
+            "123456",
+            UserRole.ShopManager
         );
 
         // Act
@@ -96,13 +97,13 @@ public class StaffLoginTests
             .Setup(r => r.GetByIdentifierAsync("employee@test.com"))
             .ReturnsAsync(user);
 
-        var code = new VerificationCode("employee@test.com", "654321");
+        var code = new VerificationCode("employee@test.com", "654321", UserRole.Employee);
 
         _codeRepo
-            .Setup(r => r.GetValidCodeAsync("employee@test.com", "654321"))
+            .Setup(r => r.GetValidCodeAsync("employee@test.com", "654321", UserRole.Employee))
             .ReturnsAsync(code);
 
-        var command = new StaffVerifyCodeCommand("employee@test.com", "654321");
+        var command = new StaffVerifyCodeCommand("employee@test.com", "654321", UserRole.Employee);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -135,16 +136,18 @@ public class StaffLoginTests
 
         var verificationCode = new VerificationCode(
             "employee@test.com",
-            "654321"
+            "654321",
+            UserRole.Employee
         );
 
         _codeRepo
-            .Setup(r => r.GetValidCodeAsync("employee@test.com", "654321"))
+            .Setup(r => r.GetValidCodeAsync("employee@test.com", "654321", UserRole.Employee))
             .ReturnsAsync(verificationCode);
 
         var command = new StaffVerifyCodeCommand(
             "employee@test.com",
-            "654321"
+            "654321",
+            UserRole.Employee
         );
 
         // Act
@@ -174,14 +177,14 @@ public class StaffLoginTests
         );
         manager.AssignBranch(branchId);
 
-        var verification = new VerificationCode("manager@test.com", "123456");
+        var verification = new VerificationCode("manager@test.com", "123456", UserRole.ShopManager);
 
         _userRepo
             .Setup(r => r.GetByIdentifierAsync("manager@test.com"))
             .ReturnsAsync(manager);
 
         _codeRepo
-            .Setup(r => r.GetValidCodeAsync("manager@test.com", "123456"))
+            .Setup(r => r.GetValidCodeAsync("manager@test.com", "123456", UserRole.ShopManager))
             .ReturnsAsync(verification);
 
         _jwt
@@ -192,7 +195,7 @@ public class StaffLoginTests
 
         // Act
         var result = await handler.Handle(
-            new StaffVerifyCodeCommand("manager@test.com", "123456"),
+            new StaffVerifyCodeCommand("manager@test.com", "123456", UserRole.ShopManager),
             CancellationToken.None);
 
         // Assert
@@ -213,14 +216,14 @@ public class StaffLoginTests
     {
         // Arrange
         _codeRepo
-            .Setup(r => r.GetValidCodeAsync("emp@test.com", "000000"))
+            .Setup(r => r.GetValidCodeAsync("emp@test.com", "000000", UserRole.Employee))
             .ReturnsAsync((VerificationCode?)null);
 
         var handler = CreateHandler();
 
         // Act
         var result = await handler.Handle(
-            new StaffVerifyCodeCommand("emp@test.com", "000000"),
+            new StaffVerifyCodeCommand("emp@test.com", "000000", UserRole.Employee),////
             CancellationToken.None);
 
         // Assert
@@ -246,21 +249,21 @@ public class StaffLoginTests
             role: UserRole.Employee
         );
 
-        var verification = new VerificationCode("emp@test.com", "123456");
+        var verification = new VerificationCode("emp@test.com", "123456", UserRole.Employee);
 
         _userRepo
             .Setup(r => r.GetByIdentifierAsync("emp@test.com"))
             .ReturnsAsync(employee);
 
         _codeRepo
-            .Setup(r => r.GetValidCodeAsync("emp@test.com", "123456"))
+            .Setup(r => r.GetValidCodeAsync("emp@test.com", "123456", UserRole.ShopManager))
             .ReturnsAsync(verification);
 
         var handler = CreateHandler();
 
         // Act
         var result = await handler.Handle(
-            new StaffVerifyCodeCommand("emp@test.com", "123456"),
+            new StaffVerifyCodeCommand("emp@test.com", "123456", UserRole.Employee),
             CancellationToken.None);
 
         // Assert
