@@ -1,4 +1,5 @@
-﻿using ApplicationLayer.Features.Bookings.Commands.CreateBooking;
+
+using ApplicationLayer.Features.Bookings.Commands.CreateBooking;
 using ApplicationLayer.Features.Bookings.DTOs;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -41,4 +42,30 @@ public sealed class BookingsController : ControllerBase
         var result = await _mediator.Send(new GetBranchBookingsForManagerQuery(), ct);
         return Ok(result);
     }
+
+
+ /// <summary>
+        /// Get all bookings for the shop manager's assigned branch.
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GetBookingsForBranch(CancellationToken ct)
+        {
+            var query = new GetBookingsForBranchQuery();
+            var result = await _mediator.Send(query, ct);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get details of a specific booking.
+        /// </summary>
+        [HttpGet("{bookingId}")]
+        public async Task<IActionResult> GetBookingDetails(Guid bookingId, CancellationToken ct)
+        {
+            var query = new GetBookingDetailsQuery(bookingId);
+            var result = await _mediator.Send(query, ct);
+            return Ok(result);
+        }
+
+
 }
+

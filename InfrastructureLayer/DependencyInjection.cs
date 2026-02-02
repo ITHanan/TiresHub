@@ -39,6 +39,7 @@ namespace InfrastructureLayer
             services.AddScoped<ICurrentUser, CurrentUser>();
             services.AddScoped<IBranchRepository, BranchRepository>();
             services.AddScoped<IWarehouseRepository, WarehouseRepository>();
+            services.AddScoped<IBookingRepository, BookingRepository>();
 
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateBookingCommand).Assembly));
 
