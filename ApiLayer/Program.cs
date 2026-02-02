@@ -22,7 +22,7 @@ namespace ApiLayer
                 options.AddPolicy("DevCors", policy =>
                 {
                     policy
-                        .WithOrigins("http://localhost:8080")
+                        .WithOrigins("http://localhost:8084")
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials();
