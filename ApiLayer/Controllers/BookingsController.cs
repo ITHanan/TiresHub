@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using ApplicationLayer.Features.Bookings.Queries.GetBranchBookingsForManager;
 using ApplicationLayer.Features.Bookings.Queries.GetMyBookings;
 using Microsoft.AspNetCore.Authorization;
+using ApplicationLayer.Features.Bookings.Queries.GetBookingsForBranch;
+using ApplicationLayer.Features.Bookings.Queries.GetBookingDetails;
 
 namespace ApiLayer.Controllers;
 

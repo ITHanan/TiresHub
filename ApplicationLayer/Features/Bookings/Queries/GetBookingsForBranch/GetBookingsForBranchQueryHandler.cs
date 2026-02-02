@@ -1,5 +1,6 @@
 ﻿using ApplicationLayer.Features.Bookings.Queries.GetBookingsForBranch.DTOs;
 using ApplicationLayer.Interfaces;
+using ApplicationLayer.Interfaces.Bookings;
 using ApplicationLayer.Interfaces.Identity;
 using DomainLayer.Enums;
 using MediatR;

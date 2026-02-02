@@ -199,27 +199,31 @@ namespace InfrastructureLayer.Persistence
             });
 
             // ===================== BOOKING =====================
+     
             modelBuilder.Entity<Booking>(entity =>
             {
-                entity.HasKey(b => b.Id);
+                entity.ToTable("Bookings");
+                entity.HasKey(x => x.Id);
 
-                entity.Property(b => b.ServiceType).IsRequired();
-                entity.Property(b => b.Status).IsRequired();
+                // Om ServiceType/Status/TireType är enums -> lagra som int
+                entity.Property(x => x.ServiceType).HasConversion<int>().IsRequired();
+                entity.Property(x => x.Status).HasConversion<int>().IsRequired();
+                entity.Property(x => x.TireType).HasConversion<int>(); // lägg IsRequired() om den måste finnas
 
                 entity.HasOne<Vehicle>()
                       .WithMany()
-                      .HasForeignKey(b => b.VehicleId)
+                      .HasForeignKey(x => x.VehicleId)
                       .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne<Branch>()
                       .WithMany()
+                      .HasForeignKey(x => x.BranchId)
+                      .OnDelete(DeleteBehavior.Restrict); // eller Cascade om ni vill, men Restrict brukar vara säkrare
 
-                      .HasForeignKey(b => b.BranchId);
-
-                // Add index for efficient branch-scoped booking queries
-                entity.HasIndex(b => new { b.BranchId, b.AppointmentDate });
-      
+                // Index för branch + datum (från din BookingConfiguration)
+                entity.HasIndex(x => new { x.BranchId, x.AppointmentDate });
             });
+
 
             // ===================== INSPECTION =====================
             modelBuilder.Entity<Inspection>(entity =>
