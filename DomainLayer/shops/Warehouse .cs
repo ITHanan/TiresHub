@@ -4,6 +4,8 @@ namespace DomainLayer.shops
 {
     public class Warehouse : BaseEntity
     {
+        public readonly int UsedCapacity;
+
         public string Name { get; private set; } = default!;
         public int Capacity { get; private set; }
         public int CurrentUsage { get; private set; }

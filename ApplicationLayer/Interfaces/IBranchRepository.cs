@@ -17,5 +17,8 @@ public interface IBranchRepository
   
     Task<List<Branch>> GetByIdsWithEmployeesAsync(List<Guid> branchIds, CancellationToken ct);
 
+    Task<string?> GetBranchNameAsync(Guid branchId, CancellationToken ct);
 
+    // För manager-scope om du har BranchManagers-tabell
+    Task<bool> ManagerHasAccessToBranchAsync(Guid managerUserId, Guid branchId, CancellationToken ct);
 }

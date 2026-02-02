@@ -54,6 +54,24 @@ namespace InfrastructureLayer.Repositories
                 .ToListAsync(ct);
         }
 
-     
+        public async Task<string?> GetBranchNameAsync(Guid branchId, CancellationToken ct)
+        {
+            return await _context.Branches
+                .AsNoTracking()
+                .Where(b => b.Id == branchId)
+                .Select(b => b.Name)
+                .FirstOrDefaultAsync(ct);
+        }
+
+        public async Task<bool> ManagerHasAccessToBranchAsync(Guid managerUserId, Guid branchId, CancellationToken ct)
+        {
+            return await _context.Branches
+                .AsNoTracking()
+                .AnyAsync(b =>
+                    b.Id == branchId &&
+                    b.Employees.Any(e => e.Id == managerUserId),
+                    ct);
+        }
+
     }
 }
