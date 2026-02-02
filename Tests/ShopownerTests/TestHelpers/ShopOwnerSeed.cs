@@ -47,34 +47,32 @@ public static class ShopOwnerSeed
     }
 
 
-public static Booking Booking(
-    AppDbContext db,
-    Branch branch,
-    Vehicle vehicle,
-    ServiceType serviceType = ServiceType.ChangeTires,
-    DateTime? appointmentDate = null,
-    TireType? tireType = null,
-    int? quantity = null)
-{
-    var date = appointmentDate ?? DateTime.UtcNow.AddDays(1);
+    public static Booking Booking(
+        AppDbContext db,
+        Branch branch,
+        Vehicle vehicle,
+        ServiceType serviceType = ServiceType.ChangeTires,
+        DateTime? appointmentDate = null,
+        TireType tireType = TireType.Summer,
+        int? quantity = null)
+    {
+        var date = appointmentDate ?? DateTime.UtcNow.AddDays(1);
 
-    if (serviceType == ServiceType.ChangeTires)
-        tireType ??= TireType.Summer;
+        if (serviceType == ServiceType.BuyNewTires)
+            quantity ??= 4;
 
-    if (serviceType == ServiceType.BuyNewTires)
-        quantity ??= 4;
+        var booking = DomainLayer.Bookings.Booking.Create(
+            serviceType,
+            date,
+            vehicle.Id,
+            branch.Id,
+            tireType,
+            quantity
+        );
 
-    var booking = DomainLayer.Bookings.Booking.Create(
-        serviceType,
-        date,
-        vehicle.Id,
-        branch.Id,
-        tireType,
-        quantity
-    );
+        db.Bookings.Add(booking);
+        return booking;
+    }
 
-    db.Bookings.Add(booking);
-    return booking;
-}
 
 }

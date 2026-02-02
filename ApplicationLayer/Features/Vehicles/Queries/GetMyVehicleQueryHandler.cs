@@ -2,16 +2,12 @@
 using ApplicationLayer.Interfaces;
 using DomainLayer.Common;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ApplicationLayer.Features.Vehicles.Queries
 {
     public class GetMyVehiclesQueryHandler
-       : IRequestHandler<GetMyVehiclesQuery, OperationResult<List<VehicleDto>>>
+      : IRequestHandler<GetMyVehiclesQuery, OperationResult<MyVehiclesResultDto>>
+
     {
         private readonly IVehicleRepository _vehicles;
 
@@ -20,24 +16,41 @@ namespace ApplicationLayer.Features.Vehicles.Queries
             _vehicles = vehicles;
         }
 
-        public async Task<OperationResult<List<VehicleDto>>> Handle(
+        public async Task<OperationResult<MyVehiclesResultDto>> Handle(
             GetMyVehiclesQuery request,
             CancellationToken cancellationToken)
         {
-            var vehicles = await _vehicles.GetActiveByOwnerAsync(request.OwnerId);
+            var vehicles = await _vehicles.GetByOwnerAsync(request.OwnerId);
 
+            var activeVehicles = vehicles.Where(v => v.IsActive).ToList();
+            var inactiveVehicles = vehicles.Where(v => !v.IsActive).ToList();
 
-           // Find only active vehicles
-            var activeVehicle = vehicles.Where(v => v.IsActive).Select(v => new VehicleDto(
+            var activeDtos = activeVehicles.Select(v => new VehicleDto(
                 v.Id,
                 v.PlateNumber,
                 v.Make,
                 v.Model,
                 v.Year,
-                v.CreatedAt
+                v.CreatedAt,
+                v.IsActive
             )).ToList();
 
-            return OperationResult<List<VehicleDto>>.Success(activeVehicle);
+            var inactiveDtos = inactiveVehicles.Select(v => new VehicleDto(
+                v.Id,
+                v.PlateNumber,
+                v.Make,
+                v.Model,
+                v.Year,
+                v.CreatedAt,
+                v.IsActive
+            )).ToList();
+
+            var result = new MyVehiclesResultDto(
+                activeDtos,
+                inactiveDtos
+            );
+
+            return OperationResult<MyVehiclesResultDto>.Success(result);
         }
     }
 }

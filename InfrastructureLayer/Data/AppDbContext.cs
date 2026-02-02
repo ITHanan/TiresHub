@@ -208,7 +208,10 @@ namespace InfrastructureLayer.Persistence
                 // Om ServiceType/Status/TireType är enums -> lagra som int
                 entity.Property(x => x.ServiceType).HasConversion<int>().IsRequired();
                 entity.Property(x => x.Status).HasConversion<int>().IsRequired();
-                entity.Property(x => x.TireType).HasConversion<int>(); // lägg IsRequired() om den måste finnas
+
+                entity.Property(x => x.TireType)
+                      .IsRequired()
+                      .HasConversion<int>();
 
                 entity.HasOne<Vehicle>()
                       .WithMany()

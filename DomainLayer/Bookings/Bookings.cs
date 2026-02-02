@@ -17,7 +17,7 @@ public class Booking : BaseEntity
     public Guid? AssignedEmployeeId { get; private set; }
 
     // UC-11 (service-specifik data)
-    public TireType? TireType { get; private set; }   // ChangeTires
+    public TireType TireType { get; private set; }   // ChangeTires
     public int? Quantity { get; private set; }        // BuyNewTires
 
     protected Booking() { }
@@ -51,7 +51,7 @@ public class Booking : BaseEntity
         DateTime appointmentDate,
         Guid vehicleId,
         Guid branchId,
-        TireType? tireType,
+        TireType tireType,
         int? quantity)
     {
         var booking = new Booking(serviceType, appointmentDate, vehicleId, branchId);
@@ -60,12 +60,11 @@ public class Booking : BaseEntity
     }
 
     // 🔹 UC-11: ServiceType-regler
-    private void ApplyServiceRules(TireType? tireType, int? quantity)
+    private void ApplyServiceRules(TireType tireType, int? quantity)
     {
         if (ServiceType == ServiceType.ChangeTires)
         {
-            if (tireType is null)
-                throw new DomainException("TireType is required for ChangeTires.");
+           
 
             TireType = tireType;
             Quantity = null;
@@ -78,7 +77,7 @@ public class Booking : BaseEntity
                 throw new DomainException("Quantity is required for BuyNewTires.");
 
             Quantity = quantity;
-            TireType = null;
+            TireType = tireType;
             return;
         }
 
