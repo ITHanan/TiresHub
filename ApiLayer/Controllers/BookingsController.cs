@@ -46,10 +46,10 @@ public sealed class BookingsController : ControllerBase
     }
 
 
- /// <summary>
-        /// Get all bookings for the shop manager's assigned branch.
-        /// </summary>
-        [HttpGet]
+    /// <summary>
+    /// Get all bookings for the shop manager's assigned branch.
+    /// </summary>
+    [HttpGet("Get/All/Booking/For/The/Shop/Manager/Assigned/Branch")]
         public async Task<IActionResult> GetBookingsForBranch(CancellationToken ct)
         {
             var query = new GetBookingsForBranchQuery();
@@ -60,7 +60,7 @@ public sealed class BookingsController : ControllerBase
         /// <summary>
         /// Get details of a specific booking.
         /// </summary>
-        [HttpGet("{bookingId}")]
+        [HttpGet("Get/Booking/Details/{bookingId}")]
         public async Task<IActionResult> GetBookingDetails(Guid bookingId, CancellationToken ct)
         {
             var query = new GetBookingDetailsQuery(bookingId);
