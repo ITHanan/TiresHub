@@ -11,4 +11,6 @@ public sealed class BookingListItemDto
 
     public string VehiclePlateNumber { get; init; } = "";
     public string BranchName { get; init; } = "";
+
+    
 }

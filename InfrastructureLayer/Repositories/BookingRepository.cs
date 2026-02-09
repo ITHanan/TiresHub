@@ -91,4 +91,47 @@ public sealed class BookingRepository : IBookingRepository
                 })
             .FirstOrDefaultAsync(cancellationToken);
     }
+
+    public async Task<Guid?> ReserveWarehouseAndAddBookingAsync(Booking booking, CancellationToken ct)
+    {
+        // Use a transaction and a conditional update to atomically reserve capacity on a single warehouse
+        using var tx = await _context.Database.BeginTransactionAsync(ct);
+
+        // Find a warehouse that has available capacity
+        var warehouse = await _context.Warehouses
+            .Where(w => w.BranchId == booking.BranchId && w.IsActive && w.CurrentUsage < w.Capacity)
+            .OrderBy(w => w.Id) // stable ordering
+            .FirstOrDefaultAsync(ct);
+
+        if (warehouse == null)
+        {
+            await tx.RollbackAsync(ct);
+            return null;
+        }
+
+        // Increment usage directly in DB to avoid concurrency issues
+        var updated = await _context.Database.ExecuteSqlRawAsync(
+            "UPDATE Warehouses SET CurrentUsage = CurrentUsage + 1 WHERE Id = {0} AND CurrentUsage < Capacity",
+            new object[] { warehouse.Id }, ct);
+
+        if (updated == 0)
+        {
+            // someone else took the slot concurrently
+            await tx.RollbackAsync(ct);
+            return null;
+        }
+
+        // Reload the warehouse entity to reflect updated CurrentUsage
+        await _context.Entry(warehouse).ReloadAsync(ct);
+
+        // Assign to booking
+        booking.AssignWarehouse(warehouse.Id);
+
+        await _context.Bookings.AddAsync(booking, ct);
+        await _context.SaveChangesAsync(ct);
+
+        await tx.CommitAsync(ct);
+
+        return warehouse.Id;
+    }
 }

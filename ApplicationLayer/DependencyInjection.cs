@@ -20,7 +20,10 @@ namespace ApplicationLayer
             services.AddAutoMapper(assembly);
 
             services.AddValidatorsFromAssembly(assembly);
+            // existing generic validation behavior
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ApplicationLayer.Behaviors.ValidationBehavior<,>));
+            // register branch ownership validator behavior
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ApplicationLayer.Behaviors.ValidateBranchOwnershipBehavior<,>));
 
             return services;
         }

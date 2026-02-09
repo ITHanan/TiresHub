@@ -15,4 +15,9 @@ public interface IBookingRepository
     Task<List<BookingSummaryDto>> GetBookingSummariesByBranchIdAsync(Guid branchId, CancellationToken cancellationToken);
     Task<BookingDetailsDto?> GetBookingDetailsAsync(Guid bookingId, CancellationToken cancellationToken);
 
+    // Atomically select an available warehouse in the booking's branch, increment its usage,
+    // assign it to the booking, and persist both the warehouse change and the booking.
+    // Returns the reserved warehouse Id on success, or null if no warehouse was available.
+    Task<Guid?> ReserveWarehouseAndAddBookingAsync(Booking booking, CancellationToken ct);
+
 }
