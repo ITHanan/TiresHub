@@ -17,6 +17,6 @@ public class CreateBookingRequestDto
     public ServiceType ServiceType { get; init; }
 
     // UC-11
-    public TireType? TireType { get; init; }
+    public TireType TireType { get; init; }
     public int? Quantity { get; init; }
 }

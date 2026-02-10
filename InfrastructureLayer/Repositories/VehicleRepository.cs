@@ -40,6 +40,7 @@ namespace InfrastructureLayer.Repositories
         public async Task<List<Vehicle>> GetByOwnerAsync(Guid ownerId)
         {
             return await _context.Vehicles
+                .AsNoTracking()
                 .Where(v => v.OwnerId == ownerId)
                 .OrderByDescending(v => v.CreatedAt)
                 .ToListAsync();

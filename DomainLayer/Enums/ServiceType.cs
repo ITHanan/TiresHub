@@ -2,7 +2,7 @@
 {
     public enum ServiceType
     {
-        ChangeTires,
-        BuyNewTires
+        ChangeTires = 0,
+        BuyNewTires = 1
     }
 }

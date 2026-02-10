@@ -63,16 +63,17 @@ namespace ApiLayer.Controllers
             if (string.IsNullOrWhiteSpace(userIdString))
                 return Unauthorized("Invalid token");
 
-            var ownerId = Guid.Parse(userIdString);
+            if (!Guid.TryParse(userIdString, out var ownerId))
+                return Unauthorized("Invalid user identifier");
 
-            var result = await _mediator.Send(
-                new GetMyVehiclesQuery(ownerId));
+            var result = await _mediator.Send(new GetMyVehiclesQuery(ownerId));
 
             if (!result.IsSuccess)
                 return BadRequest(result);
 
-            return Ok(result.Data);
+            return Ok(result.Data); // MyVehiclesResultDto
         }
+
 
         // PUT: /api/vehicle/{vehicleId}
         [HttpPut("{vehicleId:guid}")]

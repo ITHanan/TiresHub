@@ -133,6 +133,7 @@ namespace InfrastructureLayer.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Identifier = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     Code = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    Role = table.Column<int>(type: "int", nullable: false),
                     ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Used = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -198,6 +199,8 @@ namespace InfrastructureLayer.Migrations
                     BranchId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     WarehouseId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     AssignedEmployeeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    TireType = table.Column<int>(type: "int", nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -208,7 +211,7 @@ namespace InfrastructureLayer.Migrations
                         column: x => x.VehicleId,
                         principalTable: "Vehicles",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -299,6 +302,38 @@ namespace InfrastructureLayer.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "BranchManagers",
+                columns: table => new
+                {
+                    BranchId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ShopManagerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BranchManagers", x => new { x.BranchId, x.ShopManagerId });
+                    table.ForeignKey(
+                        name: "FK_BranchManagers_Branches_BranchId",
+                        column: x => x.BranchId,
+                        principalTable: "Branches",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_BranchManagers_Users_ShopManagerId",
+                        column: x => x.ShopManagerId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_BranchManagers_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ShopCompanies",
                 columns: table => new
                 {
@@ -332,6 +367,16 @@ namespace InfrastructureLayer.Migrations
                 name: "IX_Branches_ShopCompanyId",
                 table: "Branches",
                 column: "ShopCompanyId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BranchManagers_ShopManagerId",
+                table: "BranchManagers",
+                column: "ShopManagerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BranchManagers_UserId",
+                table: "BranchManagers",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_InspectionPhotos_InspectionReportId",
@@ -394,7 +439,7 @@ namespace InfrastructureLayer.Migrations
                 column: "BranchId",
                 principalTable: "Branches",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Branches_ShopCompanies_ShopCompanyId",
@@ -414,6 +459,9 @@ namespace InfrastructureLayer.Migrations
 
             migrationBuilder.DropTable(
                 name: "AuditLogs");
+
+            migrationBuilder.DropTable(
+                name: "BranchManagers");
 
             migrationBuilder.DropTable(
                 name: "CommunicationLogs");

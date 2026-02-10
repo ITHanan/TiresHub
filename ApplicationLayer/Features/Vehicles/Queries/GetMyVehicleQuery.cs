@@ -10,5 +10,5 @@ using System.Threading.Tasks;
 namespace ApplicationLayer.Features.Vehicles.Queries
 {
     public record GetMyVehiclesQuery(Guid OwnerId)
-        : IRequest<OperationResult<List<VehicleDto>>>;
+         : IRequest<OperationResult<MyVehiclesResultDto>>;
 }

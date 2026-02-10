@@ -113,10 +113,16 @@ namespace InfrastructureLayer.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("Quantity")
+                        .HasColumnType("int");
+
                     b.Property<int>("ServiceType")
                         .HasColumnType("int");
 
                     b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TireType")
                         .HasColumnType("int");
 
                     b.Property<Guid>("VehicleId")
@@ -131,7 +137,7 @@ namespace InfrastructureLayer.Migrations
 
                     b.HasIndex("BranchId", "AppointmentDate");
 
-                    b.ToTable("Bookings");
+                    b.ToTable("Bookings", (string)null);
                 });
 
             modelBuilder.Entity("DomainLayer.Bookings.Inspection", b =>
@@ -572,13 +578,13 @@ namespace InfrastructureLayer.Migrations
                     b.HasOne("DomainLayer.shops.Branch", null)
                         .WithMany()
                         .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("DomainLayer.Vehicles.Vehicle", null)
                         .WithMany()
                         .HasForeignKey("VehicleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
@@ -633,7 +639,7 @@ namespace InfrastructureLayer.Migrations
                     b.HasOne("DomainLayer.shops.Branch", "Branch")
                         .WithMany("BranchManagers")
                         .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("DomainLayer.Users.User", "ShopManager")
@@ -690,6 +696,7 @@ namespace InfrastructureLayer.Migrations
 
             modelBuilder.Entity("DomainLayer.shops.Branch", b =>
                 {
+                    b.Navigation("BranchManagers");
 
                     b.Navigation("Employees");
 

@@ -13,7 +13,8 @@ namespace ApplicationLayer.Features.Vehicles.Dtos
         string? Make,
         string? Model,
         int? Year,
-        DateTime CreatedAt
+        DateTime CreatedAt,
+        bool IsActive
         );
     
        
