@@ -5,6 +5,7 @@ using ApplicationLayer.Interfaces.Identity;
 using DomainLayer.Bookings;
 using DomainLayer.Enums;
 using MediatR;
+using System.Linq;
 
 namespace ApplicationLayer.Features.Bookings.Commands.CreateBooking;
 
@@ -44,7 +45,7 @@ public class CreateBookingCommandHandler
         if (!ownsVehicle)
             throw new UnauthorizedAccessException("Vehicle does not belong to user.");
 
-        // UC-10: branch capacity
+        // UC-10: branch capacity check
         await _availability.EnsureBranchHasCapacityAsync(r.BranchId, ct);
 
         var booking = Booking.Create(
@@ -57,7 +58,11 @@ public class CreateBookingCommandHandler
 
         booking.Confirm();
 
-        await _bookingRepo.AddAsync(booking, ct);
+        // Atomically reserve warehouse and persist booking using repository
+        var reservedWarehouseId = await _bookingRepo.ReserveWarehouseAndAddBookingAsync(booking, ct);
+
+        if (reservedWarehouseId == null)
+            throw new InvalidOperationException("Selected branch is currently unavailable for new bookings.");
 
         return booking.Id;
     }

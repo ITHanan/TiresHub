@@ -29,6 +29,11 @@ namespace DomainLayer.Auditing
 
         public const string TireSetLocked = "TireSetLocked";
 
-    
+        // ================= WAREHOUSE / STORAGE =================
+        public const string WarehouseUsageIncreased = "WarehouseUsageIncreased";
+        public const string WarehouseUsageDecreased = "WarehouseUsageDecreased";
+
+        public const string StorageAssigned = "StorageAssigned";
+        public const string UnauthorizedStorageAssignment = "UnauthorizedStorageAssignment";
     }
 }
