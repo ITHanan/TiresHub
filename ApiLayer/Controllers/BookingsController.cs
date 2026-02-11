@@ -1,3 +1,4 @@
+using ApplicationLayer.Features.Bookings.Commands.AssignEmployee;
 using ApplicationLayer.Features.Bookings.Commands.AssignWarehouse;
 using ApplicationLayer.Features.Bookings.Commands.CreateBooking;
 using ApplicationLayer.Features.Bookings.Dtos;
@@ -117,6 +118,45 @@ public sealed class BookingsController : ControllerBase
         return Ok(result);
     }
 
+    /// <summary>
+    /// UC-15: Assign an employee to a booking (shop manager only)
+    /// </summary>
+    [HttpPost("{bookingId:guid}/assign-employee/{employeeId:guid}")]
+    [Authorize]
+    public async Task<IActionResult> AssignEmployee(Guid bookingId, Guid employeeId, CancellationToken ct)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userIdString))
+            return Unauthorized("Invalid token.");
+
+        var actorId = Guid.Parse(userIdString);
+
+        var roleClaim = User.FindFirstValue(ClaimTypes.Role);
+        if (string.IsNullOrWhiteSpace(roleClaim))
+            return Unauthorized("Invalid token.");
+
+        if (!Enum.TryParse<UserRole>(roleClaim, out var actorRole))
+            return Unauthorized("Invalid role.");
+
+        var branchIdClaim = User.FindFirstValue("BranchId");
+        Guid? actorBranchId = null;
+        if (!string.IsNullOrWhiteSpace(branchIdClaim) && Guid.TryParse(branchIdClaim, out var parsedBranchId))
+            actorBranchId = parsedBranchId;
+
+        var cmd = new AssignEmployeeCommand(
+            ActorUserId: actorId,
+            ActorRole: actorRole,
+            ActorBranchId: actorBranchId,
+            BookingId: bookingId,
+            EmployeeId: employeeId
+        );
+
+        var result = await _mediator.Send(cmd, ct);
+        if (!result.IsSuccess)
+            return BadRequest(new { error = result.ErrorMessage });
+
+        return NoContent();
+    }
 
 }
 
