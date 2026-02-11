@@ -235,4 +235,44 @@ Shop managers can view and access only bookings assigned to their specific branc
 - Comprehensive unit tests covering authorization scenarios
 
 ---
+
+**Description:**
+Shop managers can assign an active employee from their branch to handle a booking. This assignment establishes ownership and responsibility for tire inspection, preparation, and service tasks.
+
+**Key Features:**
+- **Employee Assignment:** Shop managers assign employees to bookings
+- **Branch-Scoped Assignment:** Only employees from the same branch as the booking can be assigned
+- **Active Employee Validation:** Inactive employees cannot be assigned
+- **Reassignment Support:** Previously assigned employees can be changed with full audit trail
+- **Authorization Enforcement:** Only shop managers can perform assignments
+- **Audit Logging:** All assignments, reassignments, and unauthorized attempts are logged
+
+**API Endpoints:**
+- `POST /api/bookings/{bookingId}/assign-employee/{employeeId}` - Assign or reassign an employee to a booking
+
+**Business Rules:**
+- Employee must have `Employee` role
+- Employee must be active (`IsActive = true`)
+- Employee must belong to the same branch as the booking
+- Only shop managers can assign employees
+- Manager must belong to the same branch as the booking
+- Reassignments are tracked with previous employee ID in audit logs
+
+**Security:**
+- Role-based authorization (Shop Manager only)
+- Branch boundary enforcement
+- Audit logging of all assignment attempts
+- Unauthorized cross-branch assignment attempts are blocked and logged
+
+**Notification:**
+- Employee notification is triggered on assignment (mocked implementation)
+- In production, this would send email, push, or in-app notifications
+
+**Technical Implementation:**
+- Clean Architecture with CQRS pattern (MediatR)
+- Command: `AssignEmployeeCommand`
+- Handler: `AssignEmployeeCommandHandler`
+- Comprehensive unit tests covering all scenarios
+- Audit actions: `EmployeeAssigned`, `EmployeeReassigned`, `UnauthorizedEmployeeAssignment`
+
 ```

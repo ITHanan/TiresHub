@@ -35,5 +35,11 @@ namespace DomainLayer.Auditing
 
         public const string StorageAssigned = "StorageAssigned";
         public const string UnauthorizedStorageAssignment = "UnauthorizedStorageAssignment";
+
+        // ================= EMPLOYEE ASSIGNMENT =================
+        public const string EmployeeAssigned = "EmployeeAssigned";
+        public const string EmployeeReassigned = "EmployeeReassigned";
+        public const string EmployeeAssignmentFailed = "EmployeeAssignmentFailed";
+        public const string UnauthorizedEmployeeAssignment = "UnauthorizedEmployeeAssignment";
     }
 }
