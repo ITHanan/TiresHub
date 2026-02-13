@@ -1,6 +1,8 @@
 using ApplicationLayer.Features.Employees.Commands;
+using ApplicationLayer.Features.Employees.Validators;
 using DomainLayer.Enums;
 using DomainLayer.Users;
+using FluentValidation.TestHelper;
 using InfrastructureLayer.Repositories;
 using Tests.ShopownerTests.TestHelpers;
 using Xunit;
@@ -10,6 +12,73 @@ namespace Tests.Employees;
 
 public class DeactivateReactivateEmployeeTests
 {
+    #region Deactivate Validator Tests
+
+    [Fact]
+    public void DeactivateValidator_Should_Fail_When_EmployeeId_Is_Empty()
+    {
+        // Arrange
+        var validator = new DeactivateEmployeeCommandValidator();
+        var command = new DeactivateEmployeeCommand(Guid.Empty);
+
+        // Act
+        var result = validator.TestValidate(command);
+
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.EmployeeId)
+            .WithErrorMessage("Employee ID is required.");
+    }
+
+    [Fact]
+    public void DeactivateValidator_Should_Pass_When_EmployeeId_Is_Valid()
+    {
+        // Arrange
+        var validator = new DeactivateEmployeeCommandValidator();
+        var command = new DeactivateEmployeeCommand(Guid.NewGuid());
+
+        // Act
+        var result = validator.TestValidate(command);
+
+        // Assert
+        result.ShouldNotHaveAnyValidationErrors();
+    }
+
+    #endregion
+
+    #region Reactivate Validator Tests
+
+    [Fact]
+    public void ReactivateValidator_Should_Fail_When_EmployeeId_Is_Empty()
+    {
+        // Arrange
+        var validator = new ReactivateEmployeeCommandValidator();
+        var command = new ReactivateEmployeeCommand(Guid.Empty);
+
+        // Act
+        var result = validator.TestValidate(command);
+
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.EmployeeId)
+            .WithErrorMessage("Employee ID is required.");
+    }
+
+    [Fact]
+    public void ReactivateValidator_Should_Pass_When_EmployeeId_Is_Valid()
+    {
+        // Arrange
+        var validator = new ReactivateEmployeeCommandValidator();
+        var command = new ReactivateEmployeeCommand(Guid.NewGuid());
+
+        // Act
+        var result = validator.TestValidate(command);
+
+        // Assert
+        result.ShouldNotHaveAnyValidationErrors();
+    }
+
+    #endregion
+
+    #region Deactivate Handler Tests
     [Fact]
     public async Task DeactivateEmployee_Should_Succeed_When_Manager_Owns_Branch()
     {
@@ -231,6 +300,10 @@ public class DeactivateReactivateEmployeeTests
         Assert.Contains("only manage employees in your own branch", ex.Message);
     }
 
+    #endregion
+
+    #region Reactivate Handler Tests
+
     [Fact]
     public async Task ReactivateEmployee_Should_Succeed_When_Manager_Owns_Branch()
     {
@@ -277,4 +350,6 @@ public class DeactivateReactivateEmployeeTests
         Assert.NotNull(updatedEmployee);
         Assert.True(updatedEmployee.IsActive);
     }
+
+    #endregion
 }

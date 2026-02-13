@@ -39,20 +39,7 @@ namespace ApplicationLayer.Features.Employees.Commands
             if (!_currentUser.BranchId.HasValue)
                 throw new InvalidOperationException("Shop manager must be assigned to a branch.");
 
-            // 2. Validate required fields
-            if (string.IsNullOrWhiteSpace(request.Name))
-                throw new InvalidOperationException("Name is required.");
-
-            var hasEmail = !string.IsNullOrWhiteSpace(request.Email);
-            var hasPhone = !string.IsNullOrWhiteSpace(request.Phone);
-
-            if (!hasEmail && !hasPhone)
-                throw new InvalidOperationException("Email or phone is required.");
-
-            // For now, require email (similar to manager registration)
-            if (!hasEmail)
-                throw new InvalidOperationException("Email is required right now (phone-only not supported yet).");
-
+            // 2. Prepare email
             var email = request.Email!.Trim().ToLowerInvariant();
 
             // 3. Validate branch exists and manager has access

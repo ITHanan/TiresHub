@@ -38,7 +38,7 @@ namespace ApplicationLayer.Features.Employees.Commands
             if (!_currentUser.BranchId.HasValue)
                 throw new InvalidOperationException("Shop manager must be assigned to a branch.");
 
-            // 2. Get employee
+            // 2. Get employee and validate
             var employee = await _userRepo.GetByIdAsync(request.EmployeeId);
             if (employee == null)
                 throw new InvalidOperationException("Employee not found.");
