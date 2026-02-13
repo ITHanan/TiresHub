@@ -275,4 +275,81 @@ Shop managers can assign an active employee from their branch to handle a bookin
 - Comprehensive unit tests covering all scenarios
 - Audit actions: `EmployeeAssigned`, `EmployeeReassigned`, `UnauthorizedEmployeeAssignment`
 
+---
+
+### 📋 UC-15A: Employee Registration and Branch Assignment (Shop Manager)
+
+**Description:**
+Shop managers can create employee accounts and manage their access within their assigned branch. Employees are automatically linked to the manager's branch and cannot be assigned to multiple branches, ensuring clear responsibility and data isolation.
+
+**Key Features:**
+- **Employee Account Creation:** Shop managers create employee accounts with name and email/phone
+- **Automatic Branch Assignment:** Employees are automatically assigned to the manager's branch (immutable after creation)
+- **Single-Branch Restriction:** Employees belong to exactly one branch and cannot be reassigned
+- **Employee Status Management:** Shop managers can activate/deactivate employees to control access
+- **Employee List View:** View all employees (active and inactive) assigned to the branch
+- **Authorization Enforcement:** Only shop managers can create and manage employees in their own branch
+
+**API Endpoints:**
+- `POST /api/employees` - Create a new employee account for the manager's branch
+- `GET /api/employees` - List all employees in the manager's branch
+- `POST /api/employees/{employeeId}/deactivate` - Deactivate an employee account
+- `POST /api/employees/{employeeId}/reactivate` - Reactivate an employee account
+
+**Business Rules:**
+- Employee accounts can only be created by shop managers
+- Employee's branch is set to the manager's branch automatically (preselected and read-only)
+- Employee cannot be assigned to multiple branches
+- Branch assignment is immutable after account creation
+- Required fields: Name, Email or Phone
+- Employee role is automatically assigned (cannot be changed to other roles)
+- Deactivated employees cannot log in (authentication blocked immediately)
+- Only the branch's manager can activate/deactivate employees in that branch
+- Self-registration for employee accounts is blocked
+
+**Employee Status Management:**
+- Active employees can log in and perform their duties
+- Inactive employees are blocked at login with clear error message
+- Status changes take effect immediately (no caching)
+- Status changes are fully audited
+
+**Security:**
+- Role-based authorization (Shop Manager only)
+- Branch-scoped access enforcement
+- Cross-branch employee management is blocked
+- All employee operations are audit logged
+- Login blocked for inactive employees in both staff auth and regular auth flows
+- Unauthorized attempts are logged with user and branch information
+
+**Audit Logging:**
+All employee management actions are tracked with full audit trail:
+- `EMPLOYEE_CREATED` - New employee account created
+- `EMPLOYEE_ASSIGNED` - Employee assigned to branch
+- `EMPLOYEE_DEACTIVATED` - Employee account deactivated
+- `EMPLOYEE_REACTIVATED` - Employee account reactivated
+- Audit logs include: userId, action, entityType, entityId, timestamp, metadata
+
+**Technical Implementation:**
+- Clean Architecture with CQRS pattern (MediatR)
+- Commands: `CreateEmployeeCommand`, `DeactivateEmployeeCommand`, `ReactivateEmployeeCommand`
+- Queries: `GetBranchEmployeesQuery`
+- Handlers with comprehensive validation and authorization
+- Repository methods: `GetEmployeesByBranchIdAsync`, `GetActiveEmployeesByBranchIdAsync`
+- Database: Uses existing User entity with `BranchId` (nullable), `IsActive` (boolean), `Role` (enum)
+- No database migration needed - schema already supports employee management
+- Comprehensive unit tests (22 tests covering all scenarios)
+- API Controller: `EmployeesController` with role-based authorization
+
+**Error Handling:**
+- "Not authenticated" - User not logged in
+- "Only shop managers can create employee accounts" - Wrong role
+- "Shop manager must be assigned to a branch" - Manager has no branch
+- "Name is required" - Missing required field
+- "Email or phone is required" - Missing contact information
+- "Employee is already assigned to another branch" - Cannot reassign employee
+- "You can only manage employees in your own branch" - Cross-branch access attempt
+- "User is not an employee" - Attempting to manage non-employee user
+- "Your account has been deactivated" - Inactive employee login attempt
+
 ```
+
