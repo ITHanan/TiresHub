@@ -54,22 +54,22 @@ public class CreateEmployeeTests
     }
 
     [Fact]
-    public void Validator_Should_Fail_When_Both_Email_And_Phone_Are_Missing()
+    public void Validator_Should_Fail_When_Email_Is_Empty()
     {
         // Arrange
         var validator = new CreateEmployeeCommandValidator();
         var command = new CreateEmployeeCommand(
             Name: "John Employee",
-            Email: null,
-            Phone: null
+            Email: "",
+            Phone: "0700000000"
         );
 
         // Act
         var result = validator.TestValidate(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x)
-            .WithErrorMessage("Email or phone is required.");
+        result.ShouldHaveValidationErrorFor(x => x.Email)
+            .WithErrorMessage("Email is required right now (phone-only not supported yet).");
     }
 
     [Fact]

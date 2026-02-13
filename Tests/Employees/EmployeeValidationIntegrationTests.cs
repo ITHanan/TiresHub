@@ -29,7 +29,7 @@ public class EmployeeValidationIntegrationTests
         Assert.False(result.IsValid);
         Assert.NotEmpty(result.Errors);
         Assert.Contains(result.Errors, e => e.ErrorMessage.Contains("Name is required"));
-        Assert.Contains(result.Errors, e => e.ErrorMessage.Contains("Email or phone is required"));
+        Assert.Contains(result.Errors, e => e.ErrorMessage.Contains("Email is required"));
     }
 
     [Fact]
