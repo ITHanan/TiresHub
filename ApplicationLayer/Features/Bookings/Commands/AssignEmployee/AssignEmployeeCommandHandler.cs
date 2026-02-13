@@ -1,4 +1,5 @@
-﻿using ApplicationLayer.Interfaces;
+﻿using ApplicationLayer.Features.Bookings.Events;
+using ApplicationLayer.Interfaces;
 using ApplicationLayer.Interfaces.Bookings;
 using DomainLayer.Auditing;
 using DomainLayer.Common;
@@ -13,17 +14,20 @@ namespace ApplicationLayer.Features.Bookings.Commands.AssignEmployee
         private readonly IUserRepository _userRepo;
         private readonly ICompanyRepository _companyRepo;
         private readonly IAuditRepository _auditRepo;
+        private readonly IMediator _mediator;
 
         public AssignEmployeeCommandHandler(
             IBookingRepository bookingRepo,
             IUserRepository userRepo,
             ICompanyRepository companyRepo,
-            IAuditRepository auditRepo)
+            IAuditRepository auditRepo,
+            IMediator mediator)
         {
             _bookingRepo = bookingRepo;
             _userRepo = userRepo;
             _companyRepo = companyRepo;
             _auditRepo = auditRepo;
+            _mediator = mediator;
         }
 
 
@@ -134,22 +138,11 @@ namespace ApplicationLayer.Features.Bookings.Commands.AssignEmployee
                  );
 
 
-                // BE-67: Trigger employee notification (mocked)
-                // In production, this would send a notification to the employee
-                // For now, this is a no-op placeholder
-                await NotifyEmployeeAsync(request.EmployeeId, booking.Id, cancellationToken);
+                // publish domain event for notification
+                await _mediator.Publish(new EmployeeAssignedToBookingEvent(request.EmployeeId, booking.Id), cancellationToken);
 
                 return OperationResult<Unit>.Success(Unit.Value);
 
         }
-                        // BE-67: Mock notification method
-       private Task NotifyEmployeeAsync(Guid employeeId, Guid bookingId, CancellationToken cancellationToken)
-       { 
-            // Mock implementation - in production this would:
-            // - Send email notification
-            // - Push notification to mobile app
-            // - Create in-app notification
-            return Task.CompletedTask;
-       }
     }
 }
