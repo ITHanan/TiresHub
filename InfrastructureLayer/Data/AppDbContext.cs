@@ -71,6 +71,9 @@ namespace InfrastructureLayer.Persistence
                 entity.Property(u => u.Role).IsRequired();
                 entity.Property(u => u.OnboardingCompleted).HasDefaultValue(false);
                 entity.Property(u => u.IsActive).HasDefaultValue(true);
+
+                // Index for efficient employee lookups by branch and active status
+                entity.HasIndex(u => new { u.BranchId, u.IsActive });
             });
 
             // User -> Branch (Employees)
