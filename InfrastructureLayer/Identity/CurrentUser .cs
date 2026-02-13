@@ -47,7 +47,7 @@ namespace InfrastructureLayer.Identity
         {
             get
             {
-                var value = _http.HttpContext?.User?.FindFirstValue("BranchIdd");
+                var value = _http.HttpContext?.User?.FindFirstValue("branchId");
                 if (string.IsNullOrWhiteSpace(value))
                     return null;
                 return Guid.TryParse(value, out var branchId) ? branchId : null;
