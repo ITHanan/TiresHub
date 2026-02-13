@@ -41,6 +41,7 @@ namespace InfrastructureLayer
             services.AddScoped<IWarehouseRepository, WarehouseRepository>();
             services.AddScoped<IBookingRepository, BookingRepository>();
 
+            // Register MediatR handlers from ApplicationLayer assembly using configuration lambda
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateBookingCommand).Assembly));
 
             services.AddScoped<IBookingRepository, BookingRepository>();
@@ -49,6 +50,10 @@ namespace InfrastructureLayer
             // plus dina:
             services.AddScoped<IVehicleRepository, VehicleRepository>();
             services.AddScoped<IBranchRepository, BranchRepository>();
+
+            // Notification service
+            services.AddScoped<ApplicationLayer.Interfaces.INotificationService, NotificationService>();
+
             return services;
         }
     }

@@ -5,6 +5,7 @@ using DomainLayer.shops;
 using DomainLayer.Users;
 using DomainLayer.Vehicles;
 using Microsoft.EntityFrameworkCore;
+using DomainLayer.Notifications;
 
 namespace InfrastructureLayer.Persistence
 {
@@ -41,6 +42,9 @@ namespace InfrastructureLayer.Persistence
         // ===================== AUDIT =====================
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
         public DbSet<LoginAuditLog> LoginAuditLogs => Set<LoginAuditLog>();
+
+        // ===================== NOTIFICATIONS =====================
+        public DbSet<Notification> Notifications => Set<Notification>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -255,6 +259,14 @@ namespace InfrastructureLayer.Persistence
             {
                 entity.HasKey(a => a.Id);
                 entity.Property(a => a.Action).IsRequired();
+            });
+
+            // ===================== NOTIFICATION =====================
+            modelBuilder.Entity<Notification>(entity =>
+            {
+                entity.HasKey(n => n.Id);
+                entity.Property(n => n.Message).IsRequired();
+                entity.Property(n => n.IsRead).HasDefaultValue(false);
             });
         }
     }
