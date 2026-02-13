@@ -64,6 +64,13 @@ namespace ApplicationLayer.Features.StartAuth.Commands.VerifyCode
                     "User role mismatch. Role cannot be changed.");
             }
 
+            // Check if user is active
+            if (user != null && !user.IsActive)
+            {
+                return OperationResult<AuthResponseDto>.Failure(
+                    "Your account has been deactivated.");
+            }
+
 
             // 4. Persist changes
             await _codes.SaveChangesAsync();

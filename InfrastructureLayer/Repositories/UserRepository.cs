@@ -58,5 +58,19 @@ namespace InfrastructureLayer.Repositories
         {
             await _context.SaveChangesAsync();
         }
+
+        public async Task<List<User>> GetEmployeesByBranchIdAsync(Guid branchId, CancellationToken ct)
+        {
+            return await _context.Users
+                .Where(u => u.BranchId == branchId && u.Role == DomainLayer.Enums.UserRole.Employee)
+                .ToListAsync(ct);
+        }
+
+        public async Task<List<User>> GetActiveEmployeesByBranchIdAsync(Guid branchId, CancellationToken ct)
+        {
+            return await _context.Users
+                .Where(u => u.BranchId == branchId && u.Role == DomainLayer.Enums.UserRole.Employee && u.IsActive)
+                .ToListAsync(ct);
+        }
     }
 }
