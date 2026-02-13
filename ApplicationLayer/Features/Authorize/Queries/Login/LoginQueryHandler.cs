@@ -31,6 +31,10 @@ namespace ApplicationLayer.Features.Authorize.Queries.Login
                 if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
                     return OperationResult<string>.Failure("Invalid credentials.");
 
+                // Check if user is active
+                if (!user.IsActive)
+                    return OperationResult<string>.Failure("Your account has been deactivated.");
+
                 // Generate a token and return it
                 var token = _jwtGenerator.GenerateToken(user);
 
