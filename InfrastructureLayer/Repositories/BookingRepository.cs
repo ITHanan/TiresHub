@@ -4,6 +4,7 @@ using ApplicationLayer.Interfaces.Bookings;
 using DomainLayer.Bookings;
 using InfrastructureLayer.Persistence;
 using Microsoft.EntityFrameworkCore;
+using ApplicationLayer.Features.Bookings.Queries.GetAssignedBookings;
 
 namespace InfrastructureLayer.Repositories;
 
@@ -133,5 +134,28 @@ public sealed class BookingRepository : IBookingRepository
         await tx.CommitAsync(ct);
 
         return warehouse.Id;
+    }
+
+    // New: fetch bookings assigned to an employee (minimal fields for list)
+    public async Task<List<AssignedBookingDto>> GetAssignedBookingsAsync(Guid employeeId, CancellationToken cancellationToken)
+    {
+        // left join to warehouses because WarehouseId is nullable
+        var query =
+            from b in _context.Bookings.AsNoTracking()
+            join br in _context.Branches.AsNoTracking() on b.BranchId equals br.Id
+            join w in _context.Warehouses.AsNoTracking() on b.WarehouseId equals w.Id into wj
+            from w in wj.DefaultIfEmpty()
+            where b.AssignedEmployeeId == employeeId
+            orderby b.AppointmentDate
+            select new AssignedBookingDto
+            {
+                BookingId = b.Id,
+                AppointmentDate = b.AppointmentDate,
+                ServiceType = b.ServiceType,
+                WarehouseLocation = w != null ? w.Name : "",
+                BranchName = br.Name
+            };
+
+        return await query.ToListAsync(cancellationToken);
     }
 }
