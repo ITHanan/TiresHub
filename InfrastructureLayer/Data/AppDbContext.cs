@@ -202,7 +202,7 @@ namespace InfrastructureLayer.Persistence
                 entity.HasIndex(vs => new { vs.VehicleId, vs.BranchId }).IsUnique();
             });
 
-            // ===================== BOOKING =====================
+            // ===================== BOOKINGS =====================
      
             modelBuilder.Entity<Booking>(entity =>
             {
@@ -252,6 +252,14 @@ namespace InfrastructureLayer.Persistence
                       .WithOne()
                       .HasForeignKey(p => p.InspectionReportId)
                       .OnDelete(DeleteBehavior.Cascade);
+
+                // Ensure one report per booking
+                entity.HasIndex(r => r.BookingId).IsUnique();
+
+                entity.HasOne(r => r.CreatedByUser)
+                      .WithMany()
+                      .HasForeignKey(r => r.CreatedByEmployeeId)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             // ===================== AUDIT LOG =====================
@@ -267,6 +275,12 @@ namespace InfrastructureLayer.Persistence
                 entity.HasKey(n => n.Id);
                 entity.Property(n => n.Message).IsRequired();
                 entity.Property(n => n.IsRead).HasDefaultValue(false);
+            });
+
+            // Index for inspection photos
+            modelBuilder.Entity<InspectionPhoto>(entity =>
+            {
+                entity.HasIndex(p => p.InspectionReportId);
             });
         }
     }

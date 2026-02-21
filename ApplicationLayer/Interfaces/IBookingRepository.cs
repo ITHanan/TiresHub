@@ -20,4 +20,7 @@ public interface IBookingRepository
     // Returns the reserved warehouse Id on success, or null if no warehouse was available.
     Task<Guid?> ReserveWarehouseAndAddBookingAsync(Booking booking, CancellationToken ct);
 
+    // New: inspection report / owner decision lookups
+    Task<InspectionReport?> GetInspectionReportByBookingIdAsync(Guid bookingId, CancellationToken ct);
+    Task<string?> GetOwnerDecisionByBookingIdAsync(Guid bookingId, CancellationToken ct);
 }
