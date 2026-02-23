@@ -1,4 +1,5 @@
 ﻿using DomainLayer.Common;
+using DomainLayer.Users;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,15 +11,30 @@ namespace DomainLayer.Bookings
 
     public class InspectionReport : BaseEntity
     {
-        public Guid InspectionId { get; private set; }
+        // FK to Booking
+        public Guid BookingId { get; private set; }
+
         public string? Notes { get; private set; }
+
+        public Guid? CreatedByEmployeeId { get; private set; }
+        public User? CreatedByUser{ get; private set; }
+
 
         public ICollection<InspectionPhoto> Photos { get; private set; } = new List<InspectionPhoto>();
 
-        public InspectionReport(Guid inspectionId, string? notes)
+        protected InspectionReport() { }
+
+        public InspectionReport(Guid bookingId, string? notes, Guid? createdByEmployeeId = null)
         {
-            InspectionId = inspectionId;
+            BookingId = bookingId;
             Notes = notes;
+            CreatedByEmployeeId = createdByEmployeeId;
+            // CreatedAt comes from BaseEntity
+        }
+
+        public void AddPhoto(InspectionPhoto photo)
+        {
+            Photos.Add(photo);
         }
     }
 }

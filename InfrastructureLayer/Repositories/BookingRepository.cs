@@ -134,4 +134,23 @@ public sealed class BookingRepository : IBookingRepository
 
         return warehouse.Id;
     }
+
+    public async Task<InspectionReport?> GetInspectionReportByBookingIdAsync(Guid bookingId, CancellationToken ct)
+    {
+        return await _context.InspectionReports
+            .Include(r => r.Photos)
+            .Include(r => r.CreatedByUser)
+            .FirstOrDefaultAsync(r => r.BookingId == bookingId, ct);
+    }
+
+    public async Task<string?> GetOwnerDecisionByBookingIdAsync(Guid bookingId, CancellationToken ct)
+    {
+        var decision = await _context.OwnerDecisions
+            .AsNoTracking()
+            .Where(d => d.BookingId == bookingId)
+            .Select(d => d.Decision.ToString())
+            .FirstOrDefaultAsync(ct);
+
+        return decision;
+    }
 }

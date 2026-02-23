@@ -7,6 +7,7 @@ using ApplicationLayer.Features.Bookings.Queries.GetBookingDetails;
 using ApplicationLayer.Features.Bookings.Queries.GetBookingsForBranch;
 using ApplicationLayer.Features.Bookings.Queries.GetBranchBookingsForManager;
 using ApplicationLayer.Features.Bookings.Queries.GetMyBookings;
+using ApplicationLayer.Features.Bookings.Queries.GetInspectionReportByBooking;
 using DomainLayer.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -155,6 +156,35 @@ public sealed class BookingsController : ControllerBase
             return BadRequest(new { error = result.ErrorMessage });
 
         return NoContent();
+    }
+
+
+    /// <summary>
+    /// Get inspection report for a booking. Returns a response object with nullable report instead of throwing when missing.
+    /// </summary>
+    [HttpGet("{bookingId:guid}/inspection-report")]
+    [Authorize(Roles = "ShopManager,ShopOwner")]
+    public async Task<IActionResult> GetInspectionReport(Guid bookingId, CancellationToken ct)
+    {
+        var result = await _mediator.Send(new GetInspectionReportByBookingQuery(bookingId), ct);
+
+        if (result == null)
+            return NotFound();
+
+        if (!result.IsSuccess)
+        {
+            var msg = result.ErrorMessage ?? string.Empty;
+
+            if (msg.Contains("authenticated", StringComparison.OrdinalIgnoreCase))
+                return Unauthorized(new { error = msg });
+
+            if (msg.Contains("access", StringComparison.OrdinalIgnoreCase) || msg.Contains("admin", StringComparison.OrdinalIgnoreCase))
+                return Forbid();
+
+            return BadRequest(new { error = msg });
+        }
+
+        return Ok(result.Data);
     }
 
 }
