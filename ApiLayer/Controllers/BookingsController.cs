@@ -158,6 +158,7 @@ public sealed class BookingsController : ControllerBase
         return NoContent();
     }
 
+
     /// <summary>
     /// Get inspection report for a booking. Returns a response object with nullable report instead of throwing when missing.
     /// </summary>
