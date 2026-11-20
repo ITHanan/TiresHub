@@ -166,6 +166,7 @@ public sealed class BookingRepository : IBookingRepository
             };
 
         return await query.ToListAsync(cancellationToken);
+        }
     public async Task<InspectionReport?> GetInspectionReportByBookingIdAsync(Guid bookingId, CancellationToken ct)
     {
         return await _context.InspectionReports
