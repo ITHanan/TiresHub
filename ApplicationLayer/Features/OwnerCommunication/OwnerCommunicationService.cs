@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Net.Mail;
 using ApplicationLayer.Interfaces;
 using ApplicationLayer.Interfaces.Identity;
 using DomainLayer.Bookings;
@@ -70,7 +71,7 @@ public sealed class OwnerCommunicationService
         var owner = await _repo.GetOwnerAsync(booking.VehicleId, ct);
         var report = await _repo.GetReportAsync(bookingId, ct);
         var photos = report?.Photos.Select(p => p.ImageUrl).ToArray() ?? Array.Empty<string>();
-        var reason = owner == null || string.IsNullOrWhiteSpace(owner.UserEmail) ? "Owner email is missing."
+        var reason = owner == null || !IsValidEmail(owner.UserEmail) ? "Owner email is missing or invalid."
             : report == null ? "Inspection report not found."
             : photos.Length == 0 ? "Inspection report has no photos." : null;
         return new("Email", "Please review the inspection evidence and approve or reject the recommended maintenance.", photos, reason == null, reason);
@@ -85,8 +86,8 @@ public sealed class OwnerCommunicationService
         if (string.IsNullOrWhiteSpace(message) || message.Length > 4000)
             throw new CommunicationException(400, "Message is required and must be at most 4000 characters.");
         var owner = await _repo.GetOwnerAsync(booking.VehicleId, ct);
-        if (owner == null || string.IsNullOrWhiteSpace(owner.UserEmail))
-            throw new CommunicationException(400, "Owner email is missing.");
+        if (owner == null || !IsValidEmail(owner.UserEmail))
+            throw new CommunicationException(400, "Owner email is missing or invalid.");
         var report = await _repo.GetReportAsync(bookingId, ct);
         if (report == null) throw new CommunicationException(400, "Inspection report not found.");
         var photos = report.Photos.Select(p => p.ImageUrl).ToArray();
@@ -153,6 +154,10 @@ public sealed class OwnerCommunicationService
     }
 
     private static OwnerDecisionDto Decision(Booking b) => new(b.OwnerDecision?.ToString() ?? "Pending", b.OwnerDecisionAt, b.OwnerDecisionChannel);
+    private static bool IsValidEmail(string? value) => !string.IsNullOrWhiteSpace(value)
+        && !value.Contains('\r') && !value.Contains('\n')
+        && MailAddress.TryCreate(value, out var address)
+        && string.Equals(value, address.Address, StringComparison.OrdinalIgnoreCase);
     private static CommunicationLogDto ToDto(CommunicationLog log) => new(log.Id, log.Channel.ToString(), log.Status, log.CreatedAt, log.Content,
         log.EvidenceRefs == null ? Array.Empty<string>() : JsonSerializer.Deserialize<string[]>(log.EvidenceRefs) ?? Array.Empty<string>());
 }

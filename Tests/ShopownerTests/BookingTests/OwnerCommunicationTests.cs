@@ -65,6 +65,25 @@ public class OwnerCommunicationTests
     }
 
     [Xunit.Theory]
+    [InlineData("invalid-address")]
+    [InlineData("name@example.com\nBcc: other@example.com")]
+    public async Task Invalid_owner_email_blocks_preview_and_send(string email)
+    {
+        using var db = TestDbFactory.CreateDb();
+        var (booking, owner) = await Seed(db);
+        owner.UserEmail = email;
+        await db.SaveChangesAsync();
+        var sender = new Mock<IOwnerMessageSender>();
+        var service = Service(db, sender.Object, Manager(booking));
+
+        Assert.False((await service.PreviewAsync(booking.Id, CancellationToken.None)).CanSend);
+        var error = await Assert.ThrowsAsync<CommunicationException>(() => service.SendAsync(booking.Id, "Please review", "Email", CancellationToken.None));
+        Assert.Equal(400, error.StatusCode);
+        Assert.Empty(db.CommunicationLogs);
+        sender.Verify(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IReadOnlyList<string>>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Xunit.Theory]
     [InlineData(true)]
     [InlineData(false)]
     public async Task Missing_report_or_photos_blocks_sending(bool removeReport)
