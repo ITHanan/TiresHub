@@ -1,4 +1,4 @@
-﻿using ApplicationLayer.Features.Bookings.Queries.GetBookingDetails;
+using ApplicationLayer.Features.Bookings.Queries.GetBookingDetails;
 using ApplicationLayer.Features.Bookings.Queries.GetBookingDetails.DTOs;
 using ApplicationLayer.Interfaces;
 using ApplicationLayer.Interfaces.Bookings;
@@ -228,7 +228,10 @@ namespace Tests.ShopownerTests.BookingTests
         [Fact]
         public async Task Handle_ShouldThrow_WhenBookingIsNotFound()
         {
+            var userId = Guid.NewGuid();
             var bookingId = Guid.NewGuid();
+
+            SetupAuthenticatedUser(UserRole.ShopManager, userId);
 
             _bookingRepo
                 .Setup(x => x.GetBookingDetailsAsync(
