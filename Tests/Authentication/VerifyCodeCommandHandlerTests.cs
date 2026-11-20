@@ -88,6 +88,7 @@ public class VerifyCodeCommandHandlerTests
         result.IsSuccess.Should().BeTrue();
         result.Data.Should().NotBeNull();
         result.Data!.IsFirstLogin.Should().BeTrue();
+        result.Data.User.IsFirstLogin.Should().BeTrue();
 
         _users.Verify(u => u.AddAsync(It.IsAny<User>()), Times.Once);
     }
@@ -125,6 +126,7 @@ public class VerifyCodeCommandHandlerTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Data!.IsFirstLogin.Should().BeFalse();
+        result.Data.User.IsFirstLogin.Should().BeFalse();
 
         _users.Verify(u => u.AddAsync(It.IsAny<User>()), Times.Never);
     }

@@ -160,17 +160,17 @@ public class UpdateTireSetCommandHandlerTests
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.ErrorMessage.Should().Contain("only be updated after service completion");
+        result.ErrorMessage.Should().Be("Only vehicle owner can update tire data before service.");
 
         _auditRepo.Verify(a => a.LogAsync(
-            It.IsAny<Guid?>(),
-            It.IsAny<string>(),
-            It.IsAny<string>(),
-            It.IsAny<Guid?>(),
-            It.IsAny<bool>(),
-            It.IsAny<string?>(),
-            It.IsAny<string?>()
-        ), Times.Never);
+            cmd.ActorUserId,
+            AuditActions.TireSetUpdateFailed,
+            nameof(DomainLayer.Vehicles.TireSet),
+            tireSet.Id,
+            false,
+            "Only vehicle owner can update tire data before service.",
+            null
+        ), Times.Once);
 
         _tireSetRepo.Verify(r => r.SaveChangesAsync(), Times.Never);
     }
@@ -248,17 +248,17 @@ public class UpdateTireSetCommandHandlerTests
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.ErrorMessage.Should().Be("Unauthorized.");
+        result.ErrorMessage.Should().Be("Tire data is locked after service completion.");
 
         _auditRepo.Verify(a => a.LogAsync(
-            It.IsAny<Guid?>(),
-            It.IsAny<string>(),
-            It.IsAny<string>(),
-            It.IsAny<Guid?>(),
-            It.IsAny<bool>(),
-            It.IsAny<string?>(),
-            It.IsAny<string?>()
-        ), Times.Never);
+            cmd.ActorUserId,
+            AuditActions.TireSetUpdateFailed,
+            nameof(DomainLayer.Vehicles.TireSet),
+            tireSet.Id,
+            false,
+            "Tire data is locked after service completion.",
+            null
+        ), Times.Once);
 
         _tireSetRepo.Verify(r => r.SaveChangesAsync(), Times.Never);
     }

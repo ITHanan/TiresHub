@@ -84,7 +84,7 @@ namespace ApplicationLayer.Features.StartAuth.Commands.VerifyCode
                         IsFirstLogin: isFirstLogin,
                         OnboardingCompleted: user.OnboardingCompleted
                      )
-                   )
+                   ) { IsFirstLogin = isFirstLogin }
             );
 
 

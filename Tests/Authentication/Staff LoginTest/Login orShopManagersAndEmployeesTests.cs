@@ -256,7 +256,7 @@ public class StaffLoginTests
             .ReturnsAsync(employee);
 
         _codeRepo
-            .Setup(r => r.GetValidCodeAsync("emp@test.com", "123456", UserRole.ShopManager))
+            .Setup(r => r.GetValidCodeAsync("emp@test.com", "123456", UserRole.Employee))
             .ReturnsAsync(verification);
 
         var handler = CreateHandler();
