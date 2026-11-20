@@ -41,5 +41,7 @@ namespace DomainLayer.Auditing
         public const string EmployeeReassigned = "EmployeeReassigned";
         public const string EmployeeAssignmentFailed = "EmployeeAssignmentFailed";
         public const string UnauthorizedEmployeeAssignment = "UnauthorizedEmployeeAssignment";
+        public const string UnauthorizedInspectionReportAccess = "UnauthorizedInspectionReportAccess";
+        public const string InspectionReportModificationAttempt = "InspectionReportModificationAttempt";
     }
 }

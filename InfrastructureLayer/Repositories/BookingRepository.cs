@@ -27,6 +27,15 @@ public sealed class BookingRepository : IBookingRepository
         return _context.Bookings.FirstOrDefaultAsync(b => b.Id == bookingId, ct);
     }
 
+    public Task<string?> GetVehicleOwnerNameAsync(Guid vehicleId, CancellationToken ct)
+    {
+        return _context.Vehicles
+            .Where(vehicle => vehicle.Id == vehicleId)
+            .Join(_context.Users, vehicle => vehicle.OwnerId, user => user.Id,
+                (vehicle, user) => user.Name)
+            .FirstOrDefaultAsync(ct);
+    }
+
     public async Task<IReadOnlyList<Booking>> GetForVehicleOwnerAsync(Guid ownerUserId, CancellationToken ct)
     {
         // Antag: Vehicle har OwnerUserId (ändra om du har annan modell)
@@ -133,5 +142,24 @@ public sealed class BookingRepository : IBookingRepository
         await tx.CommitAsync(ct);
 
         return warehouse.Id;
+    }
+
+    public async Task<InspectionReport?> GetInspectionReportByBookingIdAsync(Guid bookingId, CancellationToken ct)
+    {
+        return await _context.InspectionReports
+            .Include(r => r.Photos)
+            .Include(r => r.CreatedByUser)
+            .FirstOrDefaultAsync(r => r.BookingId == bookingId, ct);
+    }
+
+    public async Task<string?> GetOwnerDecisionByBookingIdAsync(Guid bookingId, CancellationToken ct)
+    {
+        var decision = await _context.OwnerDecisions
+            .AsNoTracking()
+            .Where(d => d.BookingId == bookingId)
+            .Select(d => d.Decision.ToString())
+            .FirstOrDefaultAsync(ct);
+
+        return decision;
     }
 }
