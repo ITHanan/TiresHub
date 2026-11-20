@@ -9,6 +9,7 @@ public interface IBookingRepository
 {
     Task AddAsync(Booking booking, CancellationToken ct);
     Task<Booking?> GetByIdAsync(Guid bookingId, CancellationToken ct);
+    Task<string?> GetVehicleOwnerNameAsync(Guid vehicleId, CancellationToken ct);
 
     Task<IReadOnlyList<Booking>> GetForVehicleOwnerAsync(Guid ownerUserId, CancellationToken ct);
     Task<IReadOnlyList<Booking>> GetForManagerAsync(Guid managerUserId, CancellationToken ct);
@@ -23,4 +24,7 @@ public interface IBookingRepository
 
     // New: get bookings assigned to a specific employee for "My tasks"
     Task<List<AssignedBookingDto>> GetAssignedBookingsAsync(Guid employeeId, CancellationToken cancellationToken);
+    // New: inspection report / owner decision lookups
+    Task<InspectionReport?> GetInspectionReportByBookingIdAsync(Guid bookingId, CancellationToken ct);
+    Task<string?> GetOwnerDecisionByBookingIdAsync(Guid bookingId, CancellationToken ct);
 }
