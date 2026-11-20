@@ -15,6 +15,9 @@ public class Booking : BaseEntity
 
     public Guid? WarehouseId { get; private set; }
     public Guid? AssignedEmployeeId { get; private set; }
+    public OwnerDecisionType? OwnerDecision { get; private set; }
+    public DateTime? OwnerDecisionAt { get; private set; }
+    public string? OwnerDecisionChannel { get; private set; }
 
     // UC-11 (service-specifik data)
     public TireType TireType { get; private set; }   // ChangeTires
@@ -92,4 +95,12 @@ public class Booking : BaseEntity
 
     public void AssignWarehouse(Guid warehouseId) => WarehouseId = warehouseId;
     public void AssignEmployee(Guid employeeId) => AssignedEmployeeId = employeeId;
+
+    public void RecordOwnerDecision(OwnerDecisionType decision, string channel)
+    {
+        if (!Enum.IsDefined(decision)) throw new ArgumentOutOfRangeException(nameof(decision));
+        OwnerDecision = decision;
+        OwnerDecisionAt = DateTime.UtcNow;
+        OwnerDecisionChannel = channel;
+    }
 }

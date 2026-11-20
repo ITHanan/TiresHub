@@ -111,6 +111,42 @@ Reports are read-only through this API: POST, PUT, PATCH and DELETE requests to 
 report path and its subpaths are rejected with HTTP 405 and audited. Completing
 onboarding requires a fresh login so the JWT contains the updated onboarding claim.
 
+### Contact vehicle owner API (UC-20)
+
+All endpoints require an authenticated, onboarded user. Shop Managers can contact
+owners and read logs only for their own branch; Shop Owners have administrator
+access. The vehicle owner for the booking can read and submit their decision.
+
+- `GET /api/bookings/{bookingId}/contact-owner/preview`: suggested message,
+  evidence URLs, `canSend` and the reason when sending is blocked.
+- `POST /api/bookings/{bookingId}/contact-owner`: send email with JSON
+  `{ "channel": "Email", "message": "Please review the inspection." }`.
+  An owner email and an inspection report with at least one photo are required.
+  A successful response contains the log ID and status `sent`; failed delivery
+  returns HTTP 502 with `logId` and persists `send_failed`.
+- `GET /api/bookings/{bookingId}/communication-logs`: newest-first, read-only
+  history with channel, status, timestamp, message and evidence URLs.
+- `GET /api/bookings/{bookingId}/owner-decision`: returns `Pending`, `Approved`
+  or `Rejected`, plus timestamp and channel when a decision exists.
+- `POST /api/bookings/{bookingId}/owner-decision`: the authenticated vehicle
+  owner sends `{ "decision": "Approved" }` or `{ "decision": "Rejected" }`.
+
+Only email is supported. Configure `OwnerCommunication:Smtp:Host`, `Port`, `From`,
+`Username`, `Password`, and `AllowedPhotoHosts` using environment variables or
+.NET user secrets; do not commit credentials. `AllowedPhotoHosts` is a
+comma-separated list of exact HTTPS hostnames trusted to serve inspection photos.
+The server downloads up to ten JPEG, PNG or WebP photos of at most 5 MB each and
+attaches them to the email; redirects are not followed. Missing configuration,
+inaccessible photos, or SMTP failures produce `send_failed`. `sent` means the SMTP
+server accepted the message, not that delivery to the inbox is guaranteed. A
+process interruption can leave an attempt in `sending`; check the email provider
+before retrying to avoid duplicates. When no owner response exists the decision
+remains `Pending`. A missing booking returns 404; missing email/report/photos
+blocks sending with 400; unauthorized users receive 403.
+
+Apply the EF Core migrations before using these endpoints. Existing orphaned
+communication-log rows must be resolved before adding the booking foreign key.
+
 ### Prerequisites
 
 - .NET SDK (latest LTS)

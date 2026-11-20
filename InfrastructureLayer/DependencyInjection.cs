@@ -40,6 +40,9 @@ namespace InfrastructureLayer
             services.AddScoped<IBranchRepository, BranchRepository>();
             services.AddScoped<IWarehouseRepository, WarehouseRepository>();
             services.AddScoped<IBookingRepository, BookingRepository>();
+            services.AddScoped<ApplicationLayer.Features.OwnerCommunication.IOwnerCommunicationRepository, OwnerCommunicationRepository>();
+            services.AddScoped<ApplicationLayer.Features.OwnerCommunication.IOwnerMessageSender, SmtpOwnerMessageSender>();
+            services.AddScoped<ApplicationLayer.Features.OwnerCommunication.OwnerCommunicationService>();
 
             // Register MediatR handlers from ApplicationLayer assembly using configuration lambda
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateBookingCommand).Assembly));
