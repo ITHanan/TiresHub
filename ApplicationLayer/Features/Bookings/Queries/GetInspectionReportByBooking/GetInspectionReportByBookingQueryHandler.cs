@@ -4,6 +4,8 @@ using DomainLayer.Common;
 using MediatR;
 using System.Linq;
 using DomainLayer.Enums;
+using DomainLayer.Auditing;
+using ApplicationLayer.Interfaces;
 
 namespace ApplicationLayer.Features.Bookings.Queries.GetInspectionReportByBooking;
 
@@ -11,11 +13,13 @@ public class GetInspectionReportByBookingQueryHandler : IRequestHandler<GetInspe
 {
     private readonly IBookingRepository _bookingRepo;
     private readonly ApplicationLayer.Interfaces.Identity.ICurrentUser _currentUser;
+    private readonly IAuditRepository _audit;
 
-    public GetInspectionReportByBookingQueryHandler(IBookingRepository bookingRepo, ApplicationLayer.Interfaces.Identity.ICurrentUser currentUser)
+    public GetInspectionReportByBookingQueryHandler(IBookingRepository bookingRepo, ApplicationLayer.Interfaces.Identity.ICurrentUser currentUser, IAuditRepository audit)
     {
         _bookingRepo = bookingRepo;
         _currentUser = currentUser;
+        _audit = audit;
     }
 
     public async Task<OperationResult<GetInspectionReportByBookingResponse>> Handle(GetInspectionReportByBookingQuery request, CancellationToken cancellationToken)
@@ -26,39 +30,29 @@ public class GetInspectionReportByBookingQueryHandler : IRequestHandler<GetInspe
         if (!_currentUser.IsAuthenticated)
             return OperationResult<GetInspectionReportByBookingResponse>.Failure("User is not authenticated.");
 
+        if (_currentUser.Role != UserRole.ShopManager && _currentUser.Role != UserRole.ShopOwner)
+        {
+            await _audit.LogAsync(_currentUser.UserId, AuditActions.UnauthorizedInspectionReportAccess,
+                "Booking", request.BookingId, false, "User role cannot view inspection reports.");
+            return OperationResult<GetInspectionReportByBookingResponse>.Failure("Access denied.");
+        }
+
         // Fetch booking first to perform branch checks
         var booking = await _bookingRepo.GetByIdAsync(request.BookingId, cancellationToken);
 
         if (booking == null)
         {
-            // Return a successful result with null report (A1) but BookingId empty to indicate missing booking
-            var response = new GetInspectionReportByBookingResponse
-            {
-                Booking = new BookingSummaryDto
-                {
-                    BookingId = Guid.Empty,
-                    AppointmentDate = DateTime.MinValue,
-                    CustomerName = string.Empty,
-                    ServiceType = default
-                },
-                Report = null,
-                OwnerDecision = null
-            };
-
-            return OperationResult<GetInspectionReportByBookingResponse>.Success(response);
+            return OperationResult<GetInspectionReportByBookingResponse>.Failure("Booking not found.");
         }
 
         // Role enforcement: ShopManager limited to their branch; ShopOwner treated as admin/bypass
         if (_currentUser.Role == UserRole.ShopManager)
         {
             if (!_currentUser.BranchId.HasValue || _currentUser.BranchId.Value != booking.BranchId)
-                return OperationResult<GetInspectionReportByBookingResponse>.Failure("Shop manager does not have access to this booking.");
-        }
-        else
-        {
-            if (_currentUser.Role != UserRole.ShopOwner)
             {
-                return OperationResult<GetInspectionReportByBookingResponse>.Failure("Only shop managers or admins can view inspection reports.");
+                await _audit.LogAsync(_currentUser.UserId, AuditActions.UnauthorizedInspectionReportAccess,
+                    "Booking", request.BookingId, false, "Shop manager is not assigned to the booking branch.");
+                return OperationResult<GetInspectionReportByBookingResponse>.Failure("Shop manager does not have access to this booking.");
             }
         }
 
@@ -66,7 +60,7 @@ public class GetInspectionReportByBookingQueryHandler : IRequestHandler<GetInspe
         {
             BookingId = booking.Id,
             AppointmentDate = booking.AppointmentDate,
-            CustomerName = "",
+            CustomerName = await _bookingRepo.GetVehicleOwnerNameAsync(booking.VehicleId, cancellationToken) ?? string.Empty,
             ServiceType = booking.ServiceType
         };
 

@@ -212,6 +212,8 @@ namespace InfrastructureLayer.Migrations
                     b.HasIndex("BookingId")
                         .IsUnique();
 
+                    b.HasIndex("CreatedByEmployeeId");
+
                     b.ToTable("InspectionReports");
                 });
 
@@ -318,6 +320,9 @@ namespace InfrastructureLayer.Migrations
                     b.Property<string>("Phone")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("ProfilePictureUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Role")
                         .HasColumnType("int");
@@ -636,6 +641,16 @@ namespace InfrastructureLayer.Migrations
                         .HasForeignKey("InspectionReportId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("DomainLayer.Bookings.InspectionReport", b =>
+                {
+                    b.HasOne("DomainLayer.Users.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByEmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedByUser");
                 });
 
             modelBuilder.Entity("DomainLayer.Users.User", b =>

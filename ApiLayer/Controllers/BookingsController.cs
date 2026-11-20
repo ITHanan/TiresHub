@@ -160,10 +160,14 @@ public sealed class BookingsController : ControllerBase
 
 
     /// <summary>
-    /// Get inspection report for a booking. Returns a response object with nullable report instead of throwing when missing.
+    /// Get a read-only inspection report. An existing booking without a report returns 200 with report set to null.
     /// </summary>
     [HttpGet("{bookingId:guid}/inspection-report")]
-    [Authorize(Roles = "ShopManager,ShopOwner")]
+    [Authorize]
+    [ProducesResponseType(typeof(GetInspectionReportByBookingResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetInspectionReport(Guid bookingId, CancellationToken ct)
     {
         var result = await _mediator.Send(new GetInspectionReportByBookingQuery(bookingId), ct);
@@ -174,6 +178,9 @@ public sealed class BookingsController : ControllerBase
         if (!result.IsSuccess)
         {
             var msg = result.ErrorMessage ?? string.Empty;
+
+            if (msg == "Booking not found.")
+                return NotFound(new { error = msg });
 
             if (msg.Contains("authenticated", StringComparison.OrdinalIgnoreCase))
                 return Unauthorized(new { error = msg });

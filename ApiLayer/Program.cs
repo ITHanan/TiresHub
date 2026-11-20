@@ -59,6 +59,7 @@ namespace ApiLayer
             app.UseHttpsRedirection();
             app.UseCors("DevCors");
             app.UseAuthentication(); // must come before UseAuthorization
+            app.UseMiddleware<InspectionReportReadOnlyMiddleware>();
             app.UseMiddleware<OnboardingCompletionMiddleware>();
             app.UseAuthorization();
             app.MapControllers();
