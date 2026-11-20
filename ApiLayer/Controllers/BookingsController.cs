@@ -164,7 +164,7 @@ public sealed class BookingsController : ControllerBase
     /// </summary>
     [HttpGet("{bookingId:guid}/inspection-report")]
     [Authorize]
-    [ProducesResponseType(typeof(GetInspectionReportByBookingResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(InspectionReportApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -191,7 +191,7 @@ public sealed class BookingsController : ControllerBase
             return BadRequest(new { error = msg });
         }
 
-        return Ok(result.Data);
+        return Ok(new InspectionReportApiResponse { Data = result.Data! });
     }
 
 }

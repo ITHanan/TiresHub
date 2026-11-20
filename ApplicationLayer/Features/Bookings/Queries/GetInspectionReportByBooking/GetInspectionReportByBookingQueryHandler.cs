@@ -56,14 +56,6 @@ public class GetInspectionReportByBookingQueryHandler : IRequestHandler<GetInspe
             }
         }
 
-        var bookingSummary = new BookingSummaryDto
-        {
-            BookingId = booking.Id,
-            AppointmentDate = booking.AppointmentDate,
-            CustomerName = await _bookingRepo.GetVehicleOwnerNameAsync(booking.VehicleId, cancellationToken) ?? string.Empty,
-            ServiceType = booking.ServiceType
-        };
-
         // Try load report via repository (IBookingRepository can expose a method)
         var report = await _bookingRepo.GetInspectionReportByBookingIdAsync(booking.Id, cancellationToken);
 
@@ -73,21 +65,21 @@ public class GetInspectionReportByBookingQueryHandler : IRequestHandler<GetInspe
         {
             reportDto = new InspectionReportDto
             {
+                Id = report.Id,
                 Notes = report.Notes,
-                Photos = report.Photos.Select(p => p.ImageUrl).ToList(),
+                Photos = report.Photos.Select(p => new InspectionReportPhotoDto { Id = p.Id, ImageUrl = p.ImageUrl }).ToList(),
                 CreatedAt = report.CreatedAt,
-                CreatedByName = report.CreatedByUser?.Name ?? "Unknown"
+                CreatedBy = report.CreatedByUser?.Name ?? "Unknown"
             };
         }
 
-        // owner decision lookup (if any) - assume repository method exists
-        var ownerDecision = await _bookingRepo.GetOwnerDecisionByBookingIdAsync(booking.Id, cancellationToken);
-
         var final = new GetInspectionReportByBookingResponse
         {
-            Booking = bookingSummary,
-            Report = reportDto,
-            OwnerDecision = ownerDecision
+            BookingId = booking.Id,
+            AppointmentDate = booking.AppointmentDate,
+            CustomerName = await _bookingRepo.GetVehicleOwnerNameAsync(booking.VehicleId, cancellationToken) ?? string.Empty,
+            ServiceType = booking.ServiceType.ToString(),
+            Report = reportDto
         };
 
         return OperationResult<GetInspectionReportByBookingResponse>.Success(final);

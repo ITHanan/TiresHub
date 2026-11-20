@@ -100,10 +100,11 @@ ER diagrams and architecture diagrams are included in the documentation.
 
 `GET /api/bookings/{bookingId}/inspection-report` requires an authenticated, onboarded
 Shop Manager or Shop Owner. Managers may only read bookings in their assigned branch;
-Shop Owners have administrator access across branches. The response includes the
-booking summary and, when present, the report's notes, photo URLs, creation time,
-and creator. A missing report on an existing booking returns HTTP 200 with
-`report: null`; a missing booking returns HTTP 404. Unauthenticated requests return
+Shop Owners have administrator access across branches. The response has an
+`isSuccess` flag and a `data` object with booking details, a string service type,
+and, when present, the report's ID, notes, creation time, creator, and photo IDs
+and URLs. A missing report on an existing booking returns HTTP 200 with
+`data.report: null`; a missing booking returns HTTP 404. Unauthenticated requests return
 401 and unauthorized requests return 403. Denied report reads are audited.
 
 Reports are read-only through this API: POST, PUT, PATCH and DELETE requests to the

@@ -1,4 +1,5 @@
 using ApplicationLayer.Features.Bookings.Queries.GetInspectionReportByBooking;
+using ApplicationLayer.Features.Bookings.DTOs;
 using ApplicationLayer.Interfaces;
 using DomainLayer.Auditing;
 using DomainLayer.Bookings;
@@ -12,6 +13,7 @@ using Moq;
 using Tests.ShopownerTests.TestHelpers;
 using Xunit;
 using Assert = Xunit.Assert;
+using System.Text.Json;
 
 namespace Tests.ShopownerTests.BookingTests;
 
@@ -27,7 +29,8 @@ public class InspectionReportTests
         var branchId = Guid.NewGuid();
         var booking = Booking.Create(ServiceType.ChangeTires, DateTime.UtcNow.AddDays(1), vehicle.Id, branchId, TireType.Summer, null);
         var report = new InspectionReport(booking.Id, "Tread worn", employee.Id);
-        report.AddPhoto(new InspectionPhoto(report.Id, "https://example.com/photo.jpg"));
+        var photo = new InspectionPhoto(report.Id, "https://example.com/photo.jpg");
+        report.AddPhoto(photo);
         db.Users.AddRange(customer, employee);
         db.Vehicles.Add(vehicle);
         db.Bookings.Add(booking);
@@ -40,14 +43,27 @@ public class InspectionReportTests
         var result = await handler.Handle(new(booking.Id), CancellationToken.None);
 
         Assert.True(result.IsSuccess);
-        Assert.Equal(booking.Id, result.Data!.Booking.BookingId);
-        Assert.Equal(booking.AppointmentDate, result.Data.Booking.AppointmentDate);
-        Assert.Equal(ServiceType.ChangeTires, result.Data.Booking.ServiceType);
-        Assert.Equal("Customer Name", result.Data.Booking.CustomerName);
+        Assert.Equal(booking.Id, result.Data!.BookingId);
+        Assert.Equal(booking.AppointmentDate, result.Data.AppointmentDate);
+        Assert.Equal("ChangeTires", result.Data.ServiceType);
+        Assert.Equal("Customer Name", result.Data.CustomerName);
+        Assert.Equal(report.Id, result.Data.Report!.Id);
         Assert.Equal("Tread worn", result.Data.Report!.Notes);
-        Assert.Equal("Employee Name", result.Data.Report.CreatedByName);
+        Assert.Equal("Employee Name", result.Data.Report.CreatedBy);
         Assert.Equal(report.CreatedAt, result.Data.Report.CreatedAt);
-        Assert.Equal(new[] { "https://example.com/photo.jpg" }, result.Data.Report.Photos);
+        var returnedPhoto = Assert.Single(result.Data.Report.Photos);
+        Assert.Equal(photo.Id, returnedPhoto.Id);
+        Assert.Equal("https://example.com/photo.jpg", returnedPhoto.ImageUrl);
+
+        var json = JsonSerializer.SerializeToElement(new InspectionReportApiResponse { Data = result.Data },
+            new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        Assert.True(json.GetProperty("isSuccess").GetBoolean());
+        var data = json.GetProperty("data");
+        Assert.Equal(booking.Id, data.GetProperty("bookingId").GetGuid());
+        Assert.Equal("ChangeTires", data.GetProperty("serviceType").GetString());
+        Assert.Equal(report.Id, data.GetProperty("report").GetProperty("id").GetGuid());
+        Assert.Equal(photo.Id, data.GetProperty("report").GetProperty("photos")[0].GetProperty("id").GetGuid());
+        Assert.False(data.TryGetProperty("booking", out _));
     }
 
     [Fact]
