@@ -55,7 +55,7 @@ namespace Tests.ShopownerTests.BookingTests
             {
                 Id = bookingId,
                 BranchId = branchId,
-                AssignedEmployeeId = assignedEmployeeId,
+                AssignedEmployeeId = assignedEmployeeId ?? Guid.Empty,
                 VehiclePlateNumber = "ABC123",
                 ServiceType = ServiceType.ChangeTires,
                 Status = BookingStatus.Confirmed,
