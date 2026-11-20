@@ -1,15 +1,12 @@
-﻿using ApplicationLayer.Features.Bookings.Queries.GetBookingDetails;
+using ApplicationLayer.Features.Bookings.Queries.GetBookingDetails;
 using ApplicationLayer.Features.Bookings.Queries.GetBookingDetails.DTOs;
 using ApplicationLayer.Interfaces;
 using ApplicationLayer.Interfaces.Bookings;
 using ApplicationLayer.Interfaces.Identity;
 using DomainLayer.Enums;
 using FluentAssertions;
-using InfrastructureLayer.Repositories;
 using Moq;
-using Tests.ShopownerTests.TestHelpers;
 using Xunit;
-using Assert = Xunit.Assert;
 
 namespace Tests.ShopownerTests.BookingTests
 {
@@ -27,8 +24,14 @@ namespace Tests.ShopownerTests.BookingTests
                 _userRepo.Object,
                 _auditRepo.Object);
 
+        private void SetupAuthenticatedUser(UserRole role, Guid userId)
+        {
+            _currentUser.Setup(x => x.IsAuthenticated).Returns(true);
+            _currentUser.Setup(x => x.Role).Returns(role);
+            _currentUser.Setup(x => x.UserId).Returns(userId);
+        }
 
-        private static DomainLayer.Users.User CreateShopManager(Guid branchId)
+        private static DomainLayer.Users.User CreateShopManager(Guid? branchId = null)
         {
             var user = new DomainLayer.Users.User(
                 "Manager",
@@ -36,308 +39,285 @@ namespace Tests.ShopownerTests.BookingTests
                 null,
                 UserRole.ShopManager);
 
-            user.AssignBranch(branchId);
+            if (branchId.HasValue)
+            {
+                user.AssignBranch(branchId.Value);
+            }
+
             return user;
         }
 
-        [Fact]
-        public async Task HandleShouldReturnBookingDetailsWhenUserIsAuthorized()
-        {
-            // Arrange
-            var userId = Guid.NewGuid();
-            var branchId = Guid.NewGuid();
-            var bookingId = Guid.NewGuid();
-
-            _currentUser.Setup(x => x.IsAuthenticated).Returns(true);
-            _currentUser.Setup(x => x.Role).Returns(UserRole.ShopManager);
-            _currentUser.Setup(x => x.UserId).Returns(userId);
-
-            var user = new DomainLayer.Users.User(
-                "Manager",
-                "manager@test.com",
-                null,
-                UserRole.ShopManager);
-
-            user.AssignBranch(branchId);
-
-            _userRepo.Setup(x => x.GetByIdAsync(userId))
-                .ReturnsAsync(user);
-
-            var bookingDto = new BookingDetailsDto
+        private static BookingDetailsDto CreateBooking(
+            Guid bookingId,
+            Guid branchId,
+            Guid? assignedEmployeeId = null)
+            => new()
             {
                 Id = bookingId,
                 BranchId = branchId,
+                AssignedEmployeeId = assignedEmployeeId ?? Guid.Empty,
                 VehiclePlateNumber = "ABC123",
                 ServiceType = ServiceType.ChangeTires,
                 Status = BookingStatus.Confirmed,
                 BranchName = "Branch 1"
             };
-            _bookingRepo
-                .Setup(x => x.GetBookingDetailsAsync(
-                    bookingId,
-                    It.IsAny<CancellationToken>()))
-                .ReturnsAsync(bookingDto);
-
-            var handler = CreateHandler();
-
-            // Act
-            var result = await handler.Handle(
-                new GetBookingDetailsQuery(bookingId),
-                CancellationToken.None);
-
-            // Assert
-            result.Should().NotBeNull();
-            result.Id.Should().Be(bookingId);
-            result.VehiclePlateNumber.Should().Be("ABC123");
-
-            _auditRepo.Verify(
-                x => x.LogAsync(
-                    It.IsAny<Guid?>(),
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<Guid?>(),
-                    It.IsAny<bool>(),
-                    It.IsAny<string>(),
-                    It.IsAny<string>()),
-                Times.Never);
-        }
-
-        // ----------------------------
-        // ✅ SUCCESS
-        // ----------------------------
 
         [Fact]
-        public async Task Handle_ShouldReturnBookingDetails_WhenUserIsAuthorized()
+        public async Task Handle_ShouldReturnBookingDetails_WhenShopManagerIsAuthorized()
         {
             var userId = Guid.NewGuid();
             var branchId = Guid.NewGuid();
             var bookingId = Guid.NewGuid();
+            var cancellationToken = CancellationToken.None;
+            var booking = CreateBooking(bookingId, branchId);
 
-            _currentUser.Setup(x => x.IsAuthenticated).Returns(true);
-            _currentUser.Setup(x => x.Role).Returns(UserRole.ShopManager);
-            _currentUser.Setup(x => x.UserId).Returns(userId);
+            SetupAuthenticatedUser(UserRole.ShopManager, userId);
 
             _userRepo.Setup(x => x.GetByIdAsync(userId))
                 .ReturnsAsync(CreateShopManager(branchId));
 
-            var booking = new BookingDetailsDto
-            {
-                Id = bookingId,
-                BranchId = branchId,
-                VehiclePlateNumber = "ABC123",
-                ServiceType = ServiceType.ChangeTires,
-                Status = BookingStatus.Confirmed,
-                BranchName = "Branch 1"
-            };
-
-            _bookingRepo.Setup(x =>
-                    x.GetBookingDetailsAsync(bookingId, It.IsAny<CancellationToken>()))
+            _bookingRepo
+                .Setup(x => x.GetBookingDetailsAsync(bookingId, cancellationToken))
                 .ReturnsAsync(booking);
 
-            var handler = CreateHandler();
-
-            var result = await handler.Handle(
+            var result = await CreateHandler().Handle(
                 new GetBookingDetailsQuery(bookingId),
-                CancellationToken.None);
+                cancellationToken);
 
-            result.Should().NotBeNull();
+            result.Should().BeSameAs(booking);
             result.Id.Should().Be(bookingId);
             result.VehiclePlateNumber.Should().Be("ABC123");
 
-            _auditRepo.Verify(
-                x => x.LogAsync(
-                    It.IsAny<Guid?>(),
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<Guid?>(),
-                    It.IsAny<bool>(),
-                    It.IsAny<string>(),
-                    It.IsAny<string>()),
+            _bookingRepo.Verify(
+                x => x.GetBookingDetailsAsync(bookingId, cancellationToken),
+                Times.Once);
+
+            _auditRepo.Verify(x => x.LogAsync(
+                It.IsAny<Guid?>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<Guid?>(),
+                It.IsAny<bool>(),
+                It.IsAny<string>(),
+                It.IsAny<string>()),
                 Times.Never);
         }
 
-        // ----------------------------
-        // ❌ NOT AUTHENTICATED
-        // ----------------------------
+        [Fact]
+        public async Task Handle_ShouldReturnBookingDetails_WhenEmployeeIsAssigned()
+        {
+            var employeeId = Guid.NewGuid();
+            var bookingId = Guid.NewGuid();
+            var booking = CreateBooking(bookingId, Guid.NewGuid(), employeeId);
+
+            SetupAuthenticatedUser(UserRole.Employee, employeeId);
+
+            _bookingRepo
+                .Setup(x => x.GetBookingDetailsAsync(
+                    bookingId,
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(booking);
+
+            var result = await CreateHandler().Handle(
+                new GetBookingDetailsQuery(bookingId),
+                CancellationToken.None);
+
+            result.Should().BeSameAs(booking);
+            result.Id.Should().Be(bookingId);
+
+            _auditRepo.Verify(x => x.LogAsync(
+                It.IsAny<Guid?>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<Guid?>(),
+                It.IsAny<bool>(),
+                It.IsAny<string>(),
+                It.IsAny<string>()),
+                Times.Never);
+        }
 
         [Fact]
         public async Task Handle_ShouldThrow_WhenUserIsNotAuthenticated()
         {
             _currentUser.Setup(x => x.IsAuthenticated).Returns(false);
 
-            var handler = CreateHandler();
-
-            Func<Task> act = () =>
-                handler.Handle(
-                    new GetBookingDetailsQuery(Guid.NewGuid()),
-                    CancellationToken.None);
+            Func<Task> act = () => CreateHandler().Handle(
+                new GetBookingDetailsQuery(Guid.NewGuid()),
+                CancellationToken.None);
 
             await act.Should().ThrowAsync<UnauthorizedAccessException>()
                 .WithMessage("*not authenticated*");
+
+            _bookingRepo.Verify(x => x.GetBookingDetailsAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<CancellationToken>()),
+                Times.Never);
         }
 
-        // ----------------------------
-        // ❌ NOT SHOP MANAGER
-        // ----------------------------
-
         [Fact]
-        public async Task Handle_ShouldThrow_WhenUserIsNotShopManager()
+        public async Task Handle_ShouldThrow_WhenUserHasUnsupportedRole()
         {
-            _currentUser.Setup(x => x.IsAuthenticated).Returns(true);
-            _currentUser.Setup(x => x.Role).Returns(UserRole.VehicleOwner);
+            var bookingId = Guid.NewGuid();
 
-            var handler = CreateHandler();
+            SetupAuthenticatedUser(UserRole.VehicleOwner, Guid.NewGuid());
 
-            Func<Task> act = () =>
-                handler.Handle(
-                    new GetBookingDetailsQuery(Guid.NewGuid()),
-                    CancellationToken.None);
+            _bookingRepo
+                .Setup(x => x.GetBookingDetailsAsync(
+                    bookingId,
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(CreateBooking(bookingId, Guid.NewGuid()));
+
+            Func<Task> act = () => CreateHandler().Handle(
+                new GetBookingDetailsQuery(bookingId),
+                CancellationToken.None);
 
             await act.Should().ThrowAsync<UnauthorizedAccessException>()
-                .WithMessage("*shop managers*");
+                .WithMessage("*Only shop managers or the assigned employee*");
         }
 
-        // ----------------------------
-        // ❌ USER NOT FOUND
-        // ----------------------------
-
         [Fact]
-        public async Task Handle_ShouldThrow_WhenUserNotFound()
+        public async Task Handle_ShouldThrow_WhenShopManagerIsNotFound()
         {
             var userId = Guid.NewGuid();
+            var bookingId = Guid.NewGuid();
 
-            _currentUser.Setup(x => x.IsAuthenticated).Returns(true);
-            _currentUser.Setup(x => x.Role).Returns(UserRole.ShopManager);
-            _currentUser.Setup(x => x.UserId).Returns(userId);
+            SetupAuthenticatedUser(UserRole.ShopManager, userId);
+
+            _bookingRepo
+                .Setup(x => x.GetBookingDetailsAsync(
+                    bookingId,
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(CreateBooking(bookingId, Guid.NewGuid()));
 
             _userRepo.Setup(x => x.GetByIdAsync(userId))
                 .ReturnsAsync((DomainLayer.Users.User?)null);
 
-            var handler = CreateHandler();
-
-            Func<Task> act = () =>
-                handler.Handle(
-                    new GetBookingDetailsQuery(Guid.NewGuid()),
-                    CancellationToken.None);
+            Func<Task> act = () => CreateHandler().Handle(
+                new GetBookingDetailsQuery(bookingId),
+                CancellationToken.None);
 
             await act.Should().ThrowAsync<UnauthorizedAccessException>()
                 .WithMessage("*User not found*");
         }
 
-        // ----------------------------
-        // ❌ NO BRANCH ASSIGNED
-        // ----------------------------
-
         [Fact]
-        public async Task Handle_ShouldThrow_WhenUserHasNoBranch()
+        public async Task Handle_ShouldThrow_WhenShopManagerHasNoBranch()
         {
             var userId = Guid.NewGuid();
-
-            var user = new DomainLayer.Users.User(
-                "Manager",
-                "manager@test.com",
-                null,
-                UserRole.ShopManager);
-
-            _currentUser.Setup(x => x.IsAuthenticated).Returns(true);
-            _currentUser.Setup(x => x.Role).Returns(UserRole.ShopManager);
-            _currentUser.Setup(x => x.UserId).Returns(userId);
-
-            _userRepo.Setup(x => x.GetByIdAsync(userId))
-                .ReturnsAsync(user);
-
-            var handler = CreateHandler();
-
-            Func<Task> act = () =>
-                handler.Handle(
-                    new GetBookingDetailsQuery(Guid.NewGuid()),
-                    CancellationToken.None);
-
-                   await act.Should().ThrowAsync<UnauthorizedAccessException>()
-                      .Where(e => e.Message.Contains("Shop manager is not assigned to any branch."));
-        }
-
-        // ----------------------------
-        // ❌ BOOKING NOT FOUND
-        // ----------------------------
-
-        [Fact]
-        public async Task Handle_ShouldThrow_WhenBookingNotFound()
-        {
-            var userId = Guid.NewGuid();
-            var branchId = Guid.NewGuid();
             var bookingId = Guid.NewGuid();
 
-            _currentUser.Setup(x => x.IsAuthenticated).Returns(true);
-            _currentUser.Setup(x => x.Role).Returns(UserRole.ShopManager);
-            _currentUser.Setup(x => x.UserId).Returns(userId);
+            SetupAuthenticatedUser(UserRole.ShopManager, userId);
+
+            _bookingRepo
+                .Setup(x => x.GetBookingDetailsAsync(
+                    bookingId,
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(CreateBooking(bookingId, Guid.NewGuid()));
 
             _userRepo.Setup(x => x.GetByIdAsync(userId))
-                .ReturnsAsync(CreateShopManager(branchId));
+                .ReturnsAsync(CreateShopManager());
 
-            _bookingRepo.Setup(x =>
-                    x.GetBookingDetailsAsync(bookingId, It.IsAny<CancellationToken>()))
+            Func<Task> act = () => CreateHandler().Handle(
+                new GetBookingDetailsQuery(bookingId),
+                CancellationToken.None);
+
+            await act.Should().ThrowAsync<UnauthorizedAccessException>()
+                .WithMessage("*Shop manager is not assigned to any branch.*");
+        }
+
+        [Fact]
+        public async Task Handle_ShouldThrow_WhenBookingIsNotFound()
+        {
+            var userId = Guid.NewGuid();
+            var bookingId = Guid.NewGuid();
+
+            SetupAuthenticatedUser(UserRole.ShopManager, userId);
+
+            _bookingRepo
+                .Setup(x => x.GetBookingDetailsAsync(
+                    bookingId,
+                    It.IsAny<CancellationToken>()))
                 .ReturnsAsync((BookingDetailsDto?)null);
 
-            var handler = CreateHandler();
-
-            Func<Task> act = () =>
-                handler.Handle(
-                    new GetBookingDetailsQuery(bookingId),
-                    CancellationToken.None);
+            Func<Task> act = () => CreateHandler().Handle(
+                new GetBookingDetailsQuery(bookingId),
+                CancellationToken.None);
 
             await act.Should().ThrowAsync<InvalidOperationException>()
                 .WithMessage("*Booking not found*");
         }
 
-        // ----------------------------
-        // ❌ BOOKING FROM DIFFERENT BRANCH (AUDIT)
-        // ----------------------------
-
         [Fact]
-        public async Task Handle_ShouldThrowAndLog_WhenBookingFromDifferentBranch()
+        public async Task Handle_ShouldThrowAndLog_WhenBookingBelongsToAnotherBranch()
         {
             var userId = Guid.NewGuid();
             var userBranchId = Guid.NewGuid();
             var bookingBranchId = Guid.NewGuid();
             var bookingId = Guid.NewGuid();
 
-            _currentUser.Setup(x => x.IsAuthenticated).Returns(true);
-            _currentUser.Setup(x => x.Role).Returns(UserRole.ShopManager);
-            _currentUser.Setup(x => x.UserId).Returns(userId);
+            SetupAuthenticatedUser(UserRole.ShopManager, userId);
 
             _userRepo.Setup(x => x.GetByIdAsync(userId))
                 .ReturnsAsync(CreateShopManager(userBranchId));
 
-            _bookingRepo.Setup(x =>
-                    x.GetBookingDetailsAsync(bookingId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new BookingDetailsDto
-                {
-                    Id = bookingId,
-                    BranchId = bookingBranchId
-                });
-
-            var handler = CreateHandler();
-
-            Func<Task> act = () =>
-                handler.Handle(
-                    new GetBookingDetailsQuery(bookingId),
-                    CancellationToken.None);
-
-                   await act.Should().ThrowAsync<UnauthorizedAccessException>()
-                  .WithMessage("*do not have access*");
-
-            _auditRepo.Verify(x =>
-                x.LogAsync(
-                    userId,
-                    "UnauthorizedBookingAccess",
-                    "Booking",
+            _bookingRepo
+                .Setup(x => x.GetBookingDetailsAsync(
                     bookingId,
-                    false,
-                    It.IsAny<string>(),
-                    It.IsAny<string>()),
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(CreateBooking(bookingId, bookingBranchId));
+
+            Func<Task> act = () => CreateHandler().Handle(
+                new GetBookingDetailsQuery(bookingId),
+                CancellationToken.None);
+
+            await act.Should().ThrowAsync<UnauthorizedAccessException>()
+                .WithMessage("*do not have access*");
+
+            _auditRepo.Verify(x => x.LogAsync(
+                userId,
+                "UnauthorizedBookingAccess",
+                "Booking",
+                bookingId,
+                false,
+                It.IsAny<string>(),
+                It.IsAny<string>()),
                 Times.Once);
         }
 
+        [Fact]
+        public async Task Handle_ShouldThrowAndLog_WhenEmployeeIsNotAssignedToBooking()
+        {
+            var employeeId = Guid.NewGuid();
+            var assignedEmployeeId = Guid.NewGuid();
+            var bookingId = Guid.NewGuid();
+
+            SetupAuthenticatedUser(UserRole.Employee, employeeId);
+
+            _bookingRepo
+                .Setup(x => x.GetBookingDetailsAsync(
+                    bookingId,
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(CreateBooking(
+                    bookingId,
+                    Guid.NewGuid(),
+                    assignedEmployeeId));
+
+            Func<Task> act = () => CreateHandler().Handle(
+                new GetBookingDetailsQuery(bookingId),
+                CancellationToken.None);
+
+            await act.Should().ThrowAsync<UnauthorizedAccessException>()
+                .WithMessage("*do not have access*");
+
+            _auditRepo.Verify(x => x.LogAsync(
+                employeeId,
+                "UnauthorizedBookingAccessByEmployee",
+                "Booking",
+                bookingId,
+                false,
+                It.IsAny<string>(),
+                It.IsAny<string>()),
+                Times.Once);
+        }
     }
 }
