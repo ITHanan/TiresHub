@@ -1,4 +1,4 @@
-using ApplicationLayer.Features.Bookings.Queries.GetBookingDetails;
+﻿using ApplicationLayer.Features.Bookings.Queries.GetBookingDetails;
 using ApplicationLayer.Features.Bookings.Queries.GetBookingDetails.DTOs;
 using ApplicationLayer.Interfaces;
 using ApplicationLayer.Interfaces.Bookings;
@@ -72,9 +72,12 @@ namespace Tests.ShopownerTests.BookingTests
             var booking = CreateBooking(bookingId, branchId);
 
             SetupAuthenticatedUser(UserRole.ShopManager, userId);
+
             _userRepo.Setup(x => x.GetByIdAsync(userId))
                 .ReturnsAsync(CreateShopManager(branchId));
-            _bookingRepo.Setup(x => x.GetBookingDetailsAsync(bookingId, cancellationToken))
+
+            _bookingRepo
+                .Setup(x => x.GetBookingDetailsAsync(bookingId, cancellationToken))
                 .ReturnsAsync(booking);
 
             var result = await CreateHandler().Handle(
@@ -84,9 +87,11 @@ namespace Tests.ShopownerTests.BookingTests
             result.Should().BeSameAs(booking);
             result.Id.Should().Be(bookingId);
             result.VehiclePlateNumber.Should().Be("ABC123");
+
             _bookingRepo.Verify(
                 x => x.GetBookingDetailsAsync(bookingId, cancellationToken),
                 Times.Once);
+
             _auditRepo.Verify(x => x.LogAsync(
                 It.IsAny<Guid?>(),
                 It.IsAny<string>(),
@@ -94,7 +99,8 @@ namespace Tests.ShopownerTests.BookingTests
                 It.IsAny<Guid?>(),
                 It.IsAny<bool>(),
                 It.IsAny<string>(),
-                It.IsAny<string>()), Times.Never);
+                It.IsAny<string>()),
+                Times.Never);
         }
 
         [Fact]
@@ -105,7 +111,9 @@ namespace Tests.ShopownerTests.BookingTests
             var booking = CreateBooking(bookingId, Guid.NewGuid(), employeeId);
 
             SetupAuthenticatedUser(UserRole.Employee, employeeId);
-            _bookingRepo.Setup(x => x.GetBookingDetailsAsync(
+
+            _bookingRepo
+                .Setup(x => x.GetBookingDetailsAsync(
                     bookingId,
                     It.IsAny<CancellationToken>()))
                 .ReturnsAsync(booking);
@@ -116,6 +124,7 @@ namespace Tests.ShopownerTests.BookingTests
 
             result.Should().BeSameAs(booking);
             result.Id.Should().Be(bookingId);
+
             _auditRepo.Verify(x => x.LogAsync(
                 It.IsAny<Guid?>(),
                 It.IsAny<string>(),
@@ -123,7 +132,8 @@ namespace Tests.ShopownerTests.BookingTests
                 It.IsAny<Guid?>(),
                 It.IsAny<bool>(),
                 It.IsAny<string>(),
-                It.IsAny<string>()), Times.Never);
+                It.IsAny<string>()),
+                Times.Never);
         }
 
         [Fact]
@@ -140,15 +150,19 @@ namespace Tests.ShopownerTests.BookingTests
 
             _bookingRepo.Verify(x => x.GetBookingDetailsAsync(
                 It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()), Times.Never);
+                It.IsAny<CancellationToken>()),
+                Times.Never);
         }
 
         [Fact]
         public async Task Handle_ShouldThrow_WhenUserHasUnsupportedRole()
         {
             var bookingId = Guid.NewGuid();
+
             SetupAuthenticatedUser(UserRole.VehicleOwner, Guid.NewGuid());
-            _bookingRepo.Setup(x => x.GetBookingDetailsAsync(
+
+            _bookingRepo
+                .Setup(x => x.GetBookingDetailsAsync(
                     bookingId,
                     It.IsAny<CancellationToken>()))
                 .ReturnsAsync(CreateBooking(bookingId, Guid.NewGuid()));
@@ -166,11 +180,15 @@ namespace Tests.ShopownerTests.BookingTests
         {
             var userId = Guid.NewGuid();
             var bookingId = Guid.NewGuid();
+
             SetupAuthenticatedUser(UserRole.ShopManager, userId);
-            _bookingRepo.Setup(x => x.GetBookingDetailsAsync(
+
+            _bookingRepo
+                .Setup(x => x.GetBookingDetailsAsync(
                     bookingId,
                     It.IsAny<CancellationToken>()))
                 .ReturnsAsync(CreateBooking(bookingId, Guid.NewGuid()));
+
             _userRepo.Setup(x => x.GetByIdAsync(userId))
                 .ReturnsAsync((DomainLayer.Users.User?)null);
 
@@ -187,11 +205,15 @@ namespace Tests.ShopownerTests.BookingTests
         {
             var userId = Guid.NewGuid();
             var bookingId = Guid.NewGuid();
+
             SetupAuthenticatedUser(UserRole.ShopManager, userId);
-            _bookingRepo.Setup(x => x.GetBookingDetailsAsync(
+
+            _bookingRepo
+                .Setup(x => x.GetBookingDetailsAsync(
                     bookingId,
                     It.IsAny<CancellationToken>()))
                 .ReturnsAsync(CreateBooking(bookingId, Guid.NewGuid()));
+
             _userRepo.Setup(x => x.GetByIdAsync(userId))
                 .ReturnsAsync(CreateShopManager());
 
@@ -207,7 +229,9 @@ namespace Tests.ShopownerTests.BookingTests
         public async Task Handle_ShouldThrow_WhenBookingIsNotFound()
         {
             var bookingId = Guid.NewGuid();
-            _bookingRepo.Setup(x => x.GetBookingDetailsAsync(
+
+            _bookingRepo
+                .Setup(x => x.GetBookingDetailsAsync(
                     bookingId,
                     It.IsAny<CancellationToken>()))
                 .ReturnsAsync((BookingDetailsDto?)null);
@@ -229,9 +253,12 @@ namespace Tests.ShopownerTests.BookingTests
             var bookingId = Guid.NewGuid();
 
             SetupAuthenticatedUser(UserRole.ShopManager, userId);
+
             _userRepo.Setup(x => x.GetByIdAsync(userId))
                 .ReturnsAsync(CreateShopManager(userBranchId));
-            _bookingRepo.Setup(x => x.GetBookingDetailsAsync(
+
+            _bookingRepo
+                .Setup(x => x.GetBookingDetailsAsync(
                     bookingId,
                     It.IsAny<CancellationToken>()))
                 .ReturnsAsync(CreateBooking(bookingId, bookingBranchId));
@@ -250,7 +277,8 @@ namespace Tests.ShopownerTests.BookingTests
                 bookingId,
                 false,
                 It.IsAny<string>(),
-                It.IsAny<string>()), Times.Once);
+                It.IsAny<string>()),
+                Times.Once);
         }
 
         [Fact]
@@ -261,10 +289,15 @@ namespace Tests.ShopownerTests.BookingTests
             var bookingId = Guid.NewGuid();
 
             SetupAuthenticatedUser(UserRole.Employee, employeeId);
-            _bookingRepo.Setup(x => x.GetBookingDetailsAsync(
+
+            _bookingRepo
+                .Setup(x => x.GetBookingDetailsAsync(
                     bookingId,
                     It.IsAny<CancellationToken>()))
-                .ReturnsAsync(CreateBooking(bookingId, Guid.NewGuid(), assignedEmployeeId));
+                .ReturnsAsync(CreateBooking(
+                    bookingId,
+                    Guid.NewGuid(),
+                    assignedEmployeeId));
 
             Func<Task> act = () => CreateHandler().Handle(
                 new GetBookingDetailsQuery(bookingId),
@@ -280,7 +313,8 @@ namespace Tests.ShopownerTests.BookingTests
                 bookingId,
                 false,
                 It.IsAny<string>(),
-                It.IsAny<string>()), Times.Once);
+                It.IsAny<string>()),
+                Times.Once);
         }
     }
 }
