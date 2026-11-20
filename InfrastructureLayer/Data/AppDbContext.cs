@@ -247,6 +247,12 @@ namespace InfrastructureLayer.Persistence
             });
 
             // ===================== INSPECTION REPORT =====================
+            modelBuilder.Entity<CommunicationLog>(entity =>
+            {
+                entity.HasIndex(x => new { x.BookingId, x.CreatedAt });
+                entity.HasOne<Booking>().WithMany().HasForeignKey(x => x.BookingId).OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity<InspectionReport>(entity =>
             {
                 entity.HasKey(r => r.Id);

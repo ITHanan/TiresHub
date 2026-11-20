@@ -113,6 +113,15 @@ namespace InfrastructureLayer.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("OwnerDecision")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("OwnerDecisionAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OwnerDecisionChannel")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("Quantity")
                         .HasColumnType("int");
 
@@ -229,14 +238,28 @@ namespace InfrastructureLayer.Migrations
                     b.Property<int>("Channel")
                         .HasColumnType("int");
 
+                    b.Property<string>("ContactTarget")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("EvidenceRefs")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BookingId", "CreatedAt");
 
                     b.ToTable("CommunicationLogs");
                 });
@@ -651,6 +674,15 @@ namespace InfrastructureLayer.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("CreatedByUser");
+                });
+
+            modelBuilder.Entity("DomainLayer.Communication.CommunicationLog", b =>
+                {
+                    b.HasOne("DomainLayer.Bookings.Booking", null)
+                        .WithMany()
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("DomainLayer.Users.User", b =>
